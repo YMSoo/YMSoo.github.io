@@ -15,18 +15,32 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            color: #000000;
+        }
+
+        /* Main layout container for two columns on desktop */
+        .main-game-layout {
+            width: 95vw;
+            max-width: 1200px;
+            display: flex;
             flex-direction: column;
-            color: #000000; /* Default color for player input */
+            gap: 2rem;
+            padding: 1rem;
+            align-items: center;
         }
         
         /* Grid and Cell Styling */
-        .sudoku-container {
-            width: 95vw;
+        .game-panel {
+            width: 100%;
             max-width: 500px;
             background-color: #fff;
             border-radius: 12px;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .sudoku-grid {
@@ -34,33 +48,28 @@
             grid-template-columns: repeat(9, 1fr);
             gap: 0;
             border: 2px solid #2d3748;
+            width: 100%;
+            max-width: 450px;
         }
 
         .cell {
             width: 100%;
-            aspect-ratio: 1 / 1; /* Ensures the cell is a perfect square */
+            aspect-ratio: 1 / 1;
             position: relative;
             border: 1px solid #e2e8f0;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5rem;
+            font-size: clamp(0.8rem, 4vw, 1.5rem);
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.15s ease, transform 0.1s ease;
-            box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+            box-sizing: border-box;
         }
         
-        .cell span {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
         .cell.initial {
             font-weight: 700;
-            color: rgb(25, 40, 75); /* Dark blue color for initial numbers */
+            color: rgb(25, 40, 75);
             background-color: #f0f4f8;
             cursor: default;
         }
@@ -73,23 +82,12 @@
             background-color: #edf2f7;
         }
         
-        .cell.row-highlight {
+        .cell.row-highlight, .cell.col-highlight, .cell.square-highlight {
             background-color: #e2e8f0;
-        }
-        .cell.col-highlight {
-            background-color: #e2e8f0;
-        }
-        .cell.square-highlight {
-            background-color: #e2e8f0;
-        }
-        
-        .cell.error {
-            background-color: #fcd5d5;
-            color: #c53030;
         }
         
         .cell.wrong-number {
-            color: #c53030; /* Red color for wrong numbers */
+            color: #c53030;
         }
 
         /* Notes styling */
@@ -98,7 +96,7 @@
             grid-template-columns: repeat(3, 1fr);
             width: 80%;
             height: 80%;
-            font-size: 0.6rem;
+            font-size: clamp(0.3rem, 1.5vw, 0.6rem);
             color: #718096;
             line-height: 1;
         }
@@ -125,50 +123,48 @@
         .cell:nth-child(n+1):nth-child(-n+9) { border-top: 2px solid #2d3748; }
         .cell:nth-child(n+73):nth-child(-n+81) { border-bottom: 2px solid #2d3748; }
 
-        /* Controls */
+        /* Controls Panel */
+        .controls-panel {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
         .controls-container {
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             display: flex;
             justify-content: space-around;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.5rem;
+            width: 100%;
         }
 
         .control-btn {
             background-color: #fff;
             border: 1px solid #cbd5e0;
             border-radius: 8px;
-            padding: 0.75rem 1rem;
+            padding: 0.5rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 0.75rem;
+            font-size: clamp(0.6rem, 2vw, 0.75rem);
             color: #718096;
             cursor: pointer;
             transition: background-color 0.2s, color 0.2s;
             flex: 1 1 20%;
         }
 
-        .control-btn:hover {
-            background-color: #f7fafc;
-        }
-
-        .control-btn.active {
-            background-color: #4c51bf;
-            color: #fff;
-            border-color: #4c51bf;
-        }
-
-        .control-btn.active svg {
-            fill: #fff;
-        }
-
         /* Number pad styling */
         .number-pad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 1.5rem;
+            gap: 8px;
+            margin-top: 1rem;
+            width: 100%;
+            max-width: 300px;
         }
 
         .number-btn {
@@ -177,37 +173,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5rem;
+            font-size: clamp(1rem, 4vw, 1.5rem);
             font-weight: 600;
             width: 100%;
             aspect-ratio: 1 / 1;
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .number-btn:hover {
-            background-color: #d1d9e0;
-        }
-
-        .number-btn.notes-mode {
-            background-color: #e2e8f0;
-            color: #718096;
-        }
-
-        .new-game-btn {
-            background-color: #4c51bf;
-            color: #fff;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 1.5rem;
-        }
-
-        .new-game-btn:hover {
-            background-color: #434190;
-        }
-
+        
         .message-box {
             position: fixed;
             top: 50%;
@@ -226,88 +199,85 @@
         .message-box.visible {
             display: flex;
         }
-
-        .win-message {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #4c51bf;
-            margin-bottom: 1rem;
-        }
-
-        .difficulty-options {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .difficulty-btn {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            background-color: #edf2f7;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .difficulty-btn:hover {
-            background-color: #d1d9e0;
-        }
-
-        .difficulty-btn.easy { color: #2f855a; }
-        .difficulty-btn.medium { color: #d69e2e; }
-        .difficulty-btn.hard { color: #c53030; }
         
+        @media (min-width: 768px) {
+            .main-game-layout {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 4rem;
+            }
+            .game-panel {
+                width: 50%;
+                flex-shrink: 0;
+            }
+            .controls-panel {
+                width: 50%;
+                padding-top: 1rem;
+            }
+            .sudoku-grid {
+                max-width: none;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
 
-    <div class="sudoku-container">
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Sudoku</h1>
-            <div class="flex items-center space-x-4 text-gray-600">
-                <div id="timer" class="font-medium text-lg">00:00</div>
+    <div class="main-game-layout">
+        <div class="game-panel">
+            <div class="flex items-center justify-between w-full mb-4">
+                <h1 class="text-3xl font-bold text-gray-800">Sudoku</h1>
+                <div class="flex items-center space-x-4 text-gray-600">
+                    <div id="timer" class="font-medium text-lg">00:00</div>
+                </div>
             </div>
+            <div id="sudoku-grid" class="sudoku-grid"></div>
         </div>
 
-        <div id="sudoku-grid" class="sudoku-grid"></div>
-
-        <div class="controls-container">
-            <div class="control-btn" id="notes-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h9z"/><path d="M7 16l4-4 4 4"/><path d="M11 12v6"/></svg>
-                <span>Notes</span>
+        <div class="controls-panel">
+            <div class="controls-container">
+                <div class="control-btn" id="notes-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h9z"/><path d="M7 16l4-4 4 4"/><path d="M11 12v6"/></svg>
+                    <span>Notes</span>
+                </div>
+                <div class="control-btn" id="erase-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M17 14l-4 4"/></svg>
+                    <span>Erase</span>
+                </div>
+                <div class="control-btn" id="hint-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/><path d="M12 12h.01"/><path d="M12 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>
+                    <span>Hint</span>
+                </div>
             </div>
-            <div class="control-btn" id="erase-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M17 14l-4 4"/></svg>
-                <span>Erase</span>
+    
+            <div id="number-pad" class="number-pad">
+                <div class="number-btn">1</div>
+                <div class="number-btn">2</div>
+                <div class="number-btn">3</div>
+                <div class="number-btn">4</div>
+                <div class="number-btn">5</div>
+                <div class="number-btn">6</div>
+                <div class="number-btn">7</div>
+                <div class="number-btn">8</div>
+                <div class="number-btn">9</div>
             </div>
-            <div class="control-btn" id="hint-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/><path d="M12 12h.01"/><path d="M12 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>
-                <span>Hint</span>
+    
+            <div class="flex justify-center mt-4 w-full">
+                <button id="new-game-btn" class="bg-indigo-600 text-white py-2 px-4 rounded-lg font-bold hover:bg-indigo-700 transition duration-200 ease-in-out">New Game</button>
             </div>
-        </div>
-
-        <div id="number-pad" class="number-pad">
-            <div class="number-btn">1</div>
-            <div class="number-btn">2</div>
-            <div class="number-btn">3</div>
-            <div class="number-btn">4</div>
-            <div class="number-btn">5</div>
-            <div class="number-btn">6</div>
-            <div class="number-btn">7</div>
-            <div class="number-btn">8</div>
-            <div class="number-btn">9</div>
-        </div>
-
-        <div class="flex justify-center mt-6">
-            <button id="new-game-btn" class="new-game-btn">New Game</button>
         </div>
     </div>
 
     <!-- Message box for game over/win -->
     <div id="message-box" class="message-box">
-        <span id="message-text" class="win-message">You Won!</span>
-        <div class="difficulty-options">
-            <button id="easy-btn" class="difficulty-btn easy">Easy</button>
-            <button id="medium-btn" class="difficulty-btn medium">Medium</button>
-            <button id="hard-btn" class="difficulty-btn hard">Hard</button>
+        <span id="message-text" class="text-4xl font-extrabold text-indigo-700 mb-4">You Won!</span>
+        <div class="flex flex-col gap-4">
+            <div class="text-gray-700 font-semibold text-lg">Choose a new difficulty:</div>
+            <div class="difficulty-options flex justify-center gap-4">
+                <button id="easy-btn" class="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition duration-200">Easy</button>
+                <button id="medium-btn" class="bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-600 transition duration-200">Medium</button>
+                <button id="hard-btn" class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-600 transition duration-200">Hard</button>
+            </div>
         </div>
     </div>
 
