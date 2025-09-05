@@ -272,6 +272,7 @@
             let tileElements = new Map(); // Maps tile ID to DOM element
             let score = 0;
             let isGameOver = false;
+            let isMoving = false; // Prevents moves during animation
 
             // Update best score display on load
             let bestScore = localStorage.getItem('2048-best-score') || 0;
@@ -371,20 +372,20 @@
                                 tileEl = document.createElement('div');
                                 tileEl.classList.add('tile');
                                 tileElements.set(tileObject.id, tileEl);
-                                // A crucial change: set position BEFORE appending to DOM
+                                // Crucial change: set position BEFORE appending to DOM
                                 tileEl.style.transform = `translate(${c * tileOffset}px, ${r * tileOffset}px)`;
                                 tileContainer.appendChild(tileEl);
                                 tileEl.classList.add('new-tile');
+                            } else {
+                                // Animate the existing tile's position
+                                tileEl.style.transform = `translate(${c * tileOffset}px, ${r * tileOffset}px)`;
+                                tileEl.className = `tile tile-${tileObject.value}`;
+                                tileEl.textContent = tileObject.value;
                             }
                             
                             // Update the tile's visual properties
-                            tileEl.className = `tile tile-${tileObject.value}`;
-                            tileEl.textContent = tileObject.value;
                             if (tileObject.value >= 128) tileEl.style.fontSize = "24px";
                             if (tileObject.value >= 1024) tileEl.style.fontSize = "20px";
-                            
-                            // Animate the tile's position
-                            tileEl.style.transform = `translate(${c * tileOffset}px, ${r * tileOffset}px)`;
                         }
                     }
                 }
@@ -406,44 +407,43 @@
 
             // Core game logic for moving and merging tiles
             function moveTiles(direction) {
-                if (isGameOver) return;
-                let moved = false;
+                if (isGameOver || isMoving) return;
+                isMoving = true;
                 
-                const getTile = (r, c) => grid[r][c];
-                const setTile = (r, c, tile) => grid[r][c] = tile;
-                
-                // Transpose for vertical moves
+                const originalGrid = JSON.stringify(grid);
                 
                 if (direction === 'up' || direction === 'down') {
                     for (let c = 0; c < gridSize; c++) {
                         let column = [];
                         for (let r = 0; r < gridSize; r++) column.push(grid[r][c]);
-                        let { newArray, hasMoved: colMoved } = slideAndMerge(column, direction === 'up');
-                        if (colMoved) moved = true;
+                        let { newArray } = slideAndMerge(column, direction === 'up');
                         for (let r = 0; r < gridSize; r++) grid[r][c] = newArray[r];
                     }
                 } else if (direction === 'left' || direction === 'right') {
                     for (let r = 0; r < gridSize; r++) {
                         let row = grid[r];
-                        let { newArray, hasMoved: rowMoved } = slideAndMerge(row, direction === 'left');
-                        if (rowMoved) moved = true;
+                        let { newArray } = slideAndMerge(row, direction === 'left');
                         grid[r] = newArray;
                     }
                 }
 
-                if (moved) {
+                // Only proceed if the grid has actually changed
+                if (JSON.stringify(grid) !== originalGrid) {
                     renderTiles();
+                    // Wait for the slide transition to complete (150ms)
                     setTimeout(() => {
                         addRandomTile();
                         renderTiles();
                         checkGameOver();
+                        isMoving = false;
                     }, 150);
+                } else {
+                    isMoving = false;
                 }
             }
             
             // Helper function to slide and merge a single row or column
             function slideAndMerge(arr, isForward) {
-                let hasMoved = false;
                 let newArr = arr.filter(tile => tile !== null);
                 
                 if (!isForward) {
@@ -457,7 +457,6 @@
                         newArr[i].value = mergedValue;
                         newArr[i+1] = null;
                         score += mergedValue;
-                        hasMoved = true;
                     }
                 }
                 
@@ -471,11 +470,7 @@
                     newArr.reverse();
                 }
 
-                if (JSON.stringify(arr) !== JSON.stringify(newArr)) {
-                    hasMoved = true;
-                }
-
-                return { newArray: newArr, hasMoved };
+                return { newArray: newArr };
             }
 
             // Check for game over or win
@@ -560,4 +555,3 @@
     </script>
 </body>
 </html>
-
