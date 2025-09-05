@@ -156,6 +156,13 @@
             transition: background-color 0.2s, color 0.2s;
             flex: 1 1 20%;
         }
+        
+        .control-btn.active {
+            background-color: #e0e7ff; /* Lighter blue for active state */
+            border-color: #3b82f6; /* A more prominent border color */
+            color: #1e40af; /* Darker blue text */
+        }
+
 
         /* Number pad styling */
         .number-pad {
@@ -468,6 +475,7 @@
                     } else {
                         notes.push(value);
                     }
+                    selectedCell.textContent = ''; // Clear text content for notes
                     selectedCell.dataset.notes = JSON.stringify(notes);
                     renderCellContent(selectedCell);
                 } else {
@@ -481,13 +489,23 @@
             }
 
             function renderCellContent(cell) {
-                if (cell.textContent === '') {
-                    const notes = JSON.parse(cell.dataset.notes);
-                    if (notes && notes.length > 0) {
-                        cell.innerHTML = '<div class="notes-container">' + notes.sort().map(note => `<div class="note">${note}</div>`).join('') + '</div>';
-                    } else {
-                        cell.innerHTML = '';
+                const notes = JSON.parse(cell.dataset.notes);
+                cell.innerHTML = ''; // Clear existing content
+                if (notes && notes.length > 0) {
+                    const notesContainer = document.createElement('div');
+                    notesContainer.classList.add('notes-container');
+                    
+                    for (let i = 1; i <= 9; i++) {
+                        const noteDiv = document.createElement('div');
+                        noteDiv.classList.add('note');
+                        if (notes.includes(i)) {
+                            noteDiv.textContent = i;
+                        } else {
+                            noteDiv.innerHTML = '&nbsp;'; // Use a non-breaking space to keep the grid structure
+                        }
+                        notesContainer.appendChild(noteDiv);
                     }
+                    cell.appendChild(notesContainer);
                 }
             }
 
