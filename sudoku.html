@@ -235,6 +235,7 @@
             <div class="flex items-center justify-between w-full mb-4">
                 <h1 class="text-3xl font-bold text-gray-800">Sudoku</h1>
                 <div class="flex items-center space-x-4 text-gray-600">
+                    <div id="mistake-counter" class="font-medium text-lg">Mistakes: 0 / 3</div>
                     <div id="timer" class="font-medium text-lg">00:00</div>
                 </div>
             </div>
@@ -245,15 +246,15 @@
             <div class="controls-container">
                 <div class="control-btn" id="notes-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h9z"/><path d="M7 16l4-4 4 4"/><path d="M11 12v6"/></svg>
-                    <span>Notes</span>
+                    <span>Заметки</span>
                 </div>
                 <div class="control-btn" id="erase-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M17 14l-4 4"/></svg>
-                    <span>Erase</span>
+                    <span>Стереть</span>
                 </div>
                 <div class="control-btn" id="hint-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/><path d="M12 12h.01"/><path d="M12 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>
-                    <span>Hint</span>
+                    <span>Подсказка</span>
                 </div>
             </div>
     
@@ -270,14 +271,14 @@
             </div>
     
             <div class="flex justify-center mt-4 w-full">
-                <button id="new-game-btn" class="bg-indigo-600 text-white py-2 px-4 rounded-lg font-bold hover:bg-indigo-700 transition duration-200 ease-in-out">New Game</button>
+                <button id="new-game-btn" class="bg-indigo-600 text-white py-2 px-4 rounded-lg font-bold hover:bg-indigo-700 transition duration-200 ease-in-out">Новая игра</button>
             </div>
         </div>
     </div>
 
     <!-- Message box for game over/win -->
     <div id="message-box" class="message-box">
-        <span id="message-text" class="text-4xl font-extrabold text-indigo-700 mb-4">You Won!</span>
+        <span id="message-text" class="text-4xl font-extrabold text-indigo-700 mb-4"></span>
         <div class="flex flex-col gap-4">
             <div class="text-gray-700 font-semibold text-lg">Choose a new difficulty:</div>
             <div class="difficulty-options flex justify-center gap-4">
@@ -301,7 +302,8 @@
             const messageText = document.getElementById('message-text');
             const easyBtn = document.getElementById('easy-btn');
             const mediumBtn = document.getElementById('medium-btn');
-            const hardBtn = document.getElementById('hard-btn');
+            const hardBtn = document = document.getElementById('hard-btn');
+            const mistakeCounterEl = document.getElementById('mistake-counter');
 
             let board = [];
             let solution = [];
@@ -309,6 +311,8 @@
             let notesMode = false;
             let timerInterval = null;
             let seconds = 0;
+            let mistakes = 0;
+            const mistakeLimit = 3;
 
             const puzzles = {
                 easy: [
@@ -385,6 +389,8 @@
             function initializeGame(difficulty = 'easy') {
                 stopTimer();
                 seconds = 0;
+                mistakes = 0;
+                mistakeCounterEl.textContent = `Mistakes: ${mistakes} / ${mistakeLimit}`;
                 startTimer();
                 generatePuzzle(difficulty);
                 renderGrid();
@@ -421,10 +427,10 @@
                 return gridEl.querySelector(`[data-row='${r}'][data-col='${c}']`);
             }
 
-            function highlightCells(row, col) {
+            function highlightCells() {
                 // Clear all previous highlights
                 document.querySelectorAll('.cell').forEach(cell => {
-                    cell.classList.remove('selected', 'highlighted', 'error', 'row-highlight', 'col-highlight', 'square-highlight');
+                    cell.classList.remove('selected', 'highlighted', 'row-highlight', 'col-highlight', 'square-highlight');
                 });
 
                 if (selectedCell) {
@@ -435,7 +441,7 @@
                     // Highlight all cells with the same value
                     if (selectedVal && !notesMode) {
                         document.querySelectorAll('.cell').forEach(cell => {
-                            if (cell.textContent === selectedVal && !cell.classList.contains('error')) {
+                            if (cell.textContent === selectedVal) {
                                 cell.classList.add('highlighted');
                             }
                         });
@@ -465,7 +471,7 @@
 
                 const r = parseInt(selectedCell.dataset.row);
                 const c = parseInt(selectedCell.dataset.col);
-
+                
                 // If in notes mode, handle notes
                 if (notesMode) {
                     let notes = JSON.parse(selectedCell.dataset.notes);
@@ -482,10 +488,15 @@
                     // Regular input mode
                     selectedCell.textContent = value;
                     board[r][c] = value;
-                    checkCellValidity();
-                    checkWin();
+                    // Check if a new mistake was made
+                    if (value !== solution[r][c] && !selectedCell.classList.contains('wrong-number')) {
+                        mistakes++;
+                        mistakeCounterEl.textContent = `Mistakes: ${mistakes} / ${mistakeLimit}`;
+                    }
                 }
+                updateAllErrors();
                 highlightCells();
+                checkGameState();
             }
 
             function renderCellContent(cell) {
@@ -509,49 +520,68 @@
                 }
             }
 
-            function checkCellValidity() {
-                const r = parseInt(selectedCell.dataset.row);
-                const c = parseInt(selectedCell.dataset.col);
-                const value = board[r][c];
+            function updateAllErrors() {
+                // Clear all existing errors
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.classList.remove('error', 'wrong-number');
+                });
 
-                // Remove any previous error and wrong-number states for the selected cell
-                selectedCell.classList.remove('error', 'wrong-number');
+                // Re-evaluate the entire board for errors
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        const cell = getCell(r, c);
+                        const value = board[r][c];
 
-                if (value === 0) return;
+                        if (value === 0) continue;
 
-                // Check against solution for wrong number
-                if (value !== solution[r][c]) {
-                    selectedCell.classList.add('wrong-number');
-                } else {
-                    selectedCell.classList.remove('wrong-number');
-                }
+                        // Check against solution for wrong number
+                        if (value !== solution[r][c]) {
+                            cell.classList.add('wrong-number');
+                        }
 
-                // Check for duplicates in row, column, and 3x3 square
-                for (let i = 0; i < 9; i++) {
-                    if (i !== c && board[r][i] === value) {
-                        selectedCell.classList.add('error');
-                        getCell(r, i).classList.add('error');
-                    }
-                    if (i !== r && board[i][c] === value) {
-                        selectedCell.classList.add('error');
-                        getCell(i, c).classList.add('error');
-                    }
-                }
-                const startRow = Math.floor(r / 3) * 3;
-                const startCol = Math.floor(c / 3) * 3;
-                for (let subR = 0; subR < 3; subR++) {
-                    for (let subC = 0; subC < 3; subC++) {
-                        const curR = startRow + subR;
-                        const curC = startCol + subC;
-                        if (curR !== r && curC !== c && board[curR][curC] === value) {
-                            selectedCell.classList.add('error');
-                            getCell(curR, curC).classList.add('error');
+                        // Check for duplicates in row
+                        for (let i = 0; i < 9; i++) {
+                            if (i !== c && board[r][i] === value) {
+                                cell.classList.add('error');
+                            }
+                        }
+                        
+                        // Check for duplicates in column
+                        for (let i = 0; i < 9; i++) {
+                            if (i !== r && board[i][c] === value) {
+                                cell.classList.add('error');
+                            }
+                        }
+
+                        // Check for duplicates in 3x3 square
+                        const startRow = Math.floor(r / 3) * 3;
+                        const startCol = Math.floor(c / 3) * 3;
+                        for (let subR = 0; subR < 3; subR++) {
+                            for (let subC = 0; subC < 3; subC++) {
+                                const curR = startRow + subR;
+                                const curC = startCol + subC;
+                                if (curR !== r || curC !== c) {
+                                    if (board[curR][curC] === value) {
+                                        cell.classList.add('error');
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            function checkWin() {
+
+            function checkGameState() {
+                // Check for loss condition first
+                if (mistakes >= mistakeLimit) {
+                    stopTimer();
+                    messageText.textContent = 'Игра окончена!';
+                    messageBox.classList.add('visible');
+                    return;
+                }
+
+                // Then check for win condition
                 for (let r = 0; r < 9; r++) {
                     for (let c = 0; c < 9; c++) {
                         if (board[r][c] === 0 || board[r][c] !== solution[r][c]) {
@@ -560,7 +590,7 @@
                     }
                 }
                 stopTimer();
-                messageText.textContent = 'You Won!';
+                messageText.textContent = 'Вы выиграли!';
                 messageBox.classList.add('visible');
             }
 
@@ -588,7 +618,7 @@
                         selectedCell.classList.remove('selected');
                     }
                     selectedCell = cell;
-                    highlightCells(selectedCell.dataset.row, selectedCell.dataset.col);
+                    highlightCells();
                 }
             });
 
@@ -613,6 +643,7 @@
                     board[r][c] = 0;
                     selectedCell.dataset.notes = JSON.stringify([]);
                     selectedCell.innerHTML = '';
+                    updateAllErrors(); // Update errors after erasing
                     highlightCells();
                 }
             });
@@ -623,8 +654,8 @@
                     const c = parseInt(selectedCell.dataset.col);
                     selectedCell.textContent = solution[r][c];
                     board[r][c] = solution[r][c];
-                    checkCellValidity();
-                    checkWin();
+                    updateAllErrors(); // Update errors after getting a hint
+                    checkGameState();
                 }
             });
 
@@ -648,6 +679,8 @@
                         board[r][c] = 0;
                         selectedCell.dataset.notes = JSON.stringify([]);
                         selectedCell.innerHTML = '';
+                        updateAllErrors(); // Update errors after erasing
+                        highlightCells();
                     }
                 }
             });
