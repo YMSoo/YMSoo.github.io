@@ -77,8 +77,8 @@
             scene.background = new THREE.Color(0x334155);
             
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 2, 6);
-            camera.lookAt(new THREE.Vector3(0, 1.5, 0));
+            camera.position.set(0, 5, 10);
+            camera.lookAt(new THREE.Vector3(0, 2, 0));
 
             const renderer = new THREE.WebGLRenderer({ antialias: true, canvas: document.getElementById('steve-canvas') });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -122,6 +122,45 @@
             groundBody.addShape(groundShape);
             groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
             world.addBody(groundBody);
+
+            // Invisible cubic barrier
+            const barrierSize = 10; // The size of the barrier cube
+            const wallThickness = 1; // Thickness of the invisible walls
+
+            // Top wall
+            const topWallShape = new CANNON.Box(new CANNON.Vec3(barrierSize / 2, wallThickness / 2, barrierSize / 2));
+            const topWallBody = new CANNON.Body({ mass: 0 });
+            topWallBody.addShape(topWallShape);
+            topWallBody.position.set(0, barrierSize / 2, 0);
+            world.addBody(topWallBody);
+
+            // Left wall
+            const leftWallShape = new CANNON.Box(new CANNON.Vec3(wallThickness / 2, barrierSize / 2, barrierSize / 2));
+            const leftWallBody = new CANNON.Body({ mass: 0 });
+            leftWallBody.addShape(leftWallShape);
+            leftWallBody.position.set(-barrierSize / 2, barrierSize / 4, 0);
+            world.addBody(leftWallBody);
+
+            // Right wall
+            const rightWallShape = new CANNON.Box(new CANNON.Vec3(wallThickness / 2, barrierSize / 2, barrierSize / 2));
+            const rightWallBody = new CANNON.Body({ mass: 0 });
+            rightWallBody.addShape(rightWallShape);
+            rightWallBody.position.set(barrierSize / 2, barrierSize / 4, 0);
+            world.addBody(rightWallBody);
+
+            // Back wall
+            const backWallShape = new CANNON.Box(new CANNON.Vec3(barrierSize / 2, barrierSize / 2, wallThickness / 2));
+            const backWallBody = new CANNON.Body({ mass: 0 });
+            backWallBody.addShape(backWallShape);
+            backWallBody.position.set(0, barrierSize / 4, -barrierSize / 2);
+            world.addBody(backWallBody);
+
+            // Front wall
+            const frontWallShape = new CANNON.Box(new CANNON.Vec3(barrierSize / 2, barrierSize / 2, wallThickness / 2));
+            const frontWallBody = new CANNON.Body({ mass: 0 });
+            frontWallBody.addShape(frontWallShape);
+            frontWallBody.position.set(0, barrierSize / 4, barrierSize / 2);
+            world.addBody(frontWallBody);
 
             // Steve body parts with physics
             const bodies = {};
@@ -210,17 +249,6 @@
                 const stiffness = 1000;
                 const damping = 50;
 
-                // Torso to ground constraint (matryoshka effect)
-                const torsoConstraint = new CANNON.PointToPointConstraint(
-                    bodies['torso'],
-                    new CANNON.Vec3(0, -1, 0),
-                    groundBody,
-                    new CANNON.Vec3(0, 0, 0)
-                );
-                world.addConstraint(torsoConstraint);
-                torsoConstraint.stiffness = 200;
-                torsoConstraint.damping = 20;
-
                 // Neck joint
                 const neckPivotA = new CANNON.Vec3(0, partData['torso'].size[1] / 2, 0);
                 const neckPivotB = new CANNON.Vec3(0, -partData['head'].size[1] / 2, 0);
@@ -264,7 +292,7 @@
             createSteve();
             
             // --- Keyboard interaction logic ---
-            const pushForce = 500; // Adjust force as needed
+            const pushForce = 50; // Adjusted force for a softer push
             
             window.addEventListener('keydown', (e) => {
                 let impulseDirection = new CANNON.Vec3();
