@@ -190,6 +190,7 @@
             const pantsMaterial = new THREE.MeshStandardMaterial({ color: 0x242475, roughness: 0.8 });
             const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
             const mouthMaterial = new THREE.MeshBasicMaterial({ color: 0x8B0000 });
+            const bloodMaterial = new THREE.MeshBasicMaterial({ color: 0xAA0000 });
 
             function createSteve() {
                 // Clear existing parts and constraints
@@ -298,7 +299,33 @@
             createSteve();
             
             let isTopView = false;
-            
+            let pushCounter = 0;
+            const bloodParticles = [];
+
+            function createBloodEffect(position) {
+                const particleCount = 20;
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.05, 8, 8),
+                        bloodMaterial
+                    );
+                    particle.position.copy(position);
+                    
+                    // Give particles a random initial velocity
+                    const velocity = new THREE.Vector3(
+                        (Math.random() - 0.5) * 5,
+                        Math.random() * 5,
+                        (Math.random() - 0.5) * 5
+                    );
+                    
+                    particle.velocity = velocity;
+                    particle.lifetime = 60; // particles exist for 60 frames
+                    
+                    scene.add(particle);
+                    bloodParticles.push(particle);
+                }
+            }
+
             function toggleCameraView() {
                 if (isTopView) {
                     // Switch to side view
@@ -345,6 +372,10 @@
                 }
 
                 if (impulseDirection.length() > 0) {
+                    pushCounter++;
+                    if (pushCounter % 10 === 0) {
+                        createBloodEffect(meshes['torso'].position);
+                    }
                     impulseDirection.normalize();
                     impulseDirection.scale(pushForce, impulseDirection);
                     bodies['torso'].applyImpulse(impulseDirection, new CANNON.Vec3(0, 0.5, 0)); // Apply force to the torso
@@ -363,6 +394,7 @@
                     bodies[name].angularVelocity.set(0, 0, 0);
                     bodies[name].quaternion.set(0, 0, 0, 1);
                 }
+                pushCounter = 0; // Reset counter
             });
             
             // Animation loop
@@ -375,6 +407,19 @@
                     meshes[name].position.copy(bodies[name].position);
                     meshes[name].quaternion.copy(bodies[name].quaternion);
                 }
+                
+                // Update blood particles
+                for (let i = bloodParticles.length - 1; i >= 0; i--) {
+                    const p = bloodParticles[i];
+                    p.velocity.y -= world.gravity.y * timeStep * 0.1; // Apply gravity
+                    p.position.addScaledVector(p.velocity, timeStep);
+                    p.lifetime--;
+                    if (p.lifetime <= 0) {
+                        scene.remove(p);
+                        bloodParticles.splice(i, 1);
+                    }
+                }
+
                 renderer.render(scene, camera);
             }
 
