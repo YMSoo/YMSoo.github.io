@@ -241,8 +241,10 @@
                 mouthMesh.position.set(0, -0.2, 0.5);
                 headMesh.add(mouthMesh);
 
-                const hairMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 0.5, 0.5), hairMaterial);
-                hairMesh.position.set(0, 0.25, -0.25);
+                // --- Updated Hair Geometry and Position ---
+                // New hair geometry: a thin cap that sits on top of the head
+                const hairMesh = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.2, 1.1), hairMaterial);
+                hairMesh.position.set(0, 0.5, 0); // Position it on top of the head
                 headMesh.add(hairMesh);
 
                 // Add joints to connect the body parts using PointToPointConstraint for "springy" behavior
