@@ -63,6 +63,7 @@
             <p><strong>S:</strong> Толкнуть назад</p>
             <p><strong>Q:</strong> Толкнуть вверх</p>
             <p><strong>E:</strong> Толкнуть вниз</p>
+            <p><strong>R:</strong> Переключить вид камеры</p>
         </div>
         <div id="button-container">
             <button id="reset-view-button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full shadow-lg">Сбросить вид</button>
@@ -296,6 +297,22 @@
             }
             createSteve();
             
+            let isTopView = false;
+            
+            function toggleCameraView() {
+                if (isTopView) {
+                    // Switch to side view
+                    camera.position.set(0, 5, 10);
+                    camera.lookAt(new THREE.Vector3(0, 2, 0));
+                    isTopView = false;
+                } else {
+                    // Switch to top-down view
+                    camera.position.set(0, 15, 0);
+                    camera.lookAt(new THREE.Vector3(0, 0, 0));
+                    isTopView = true;
+                }
+            }
+
             // --- Keyboard interaction logic ---
             const pushForce = 50; // Adjusted force for a softer push
             
@@ -322,6 +339,9 @@
                     case 'e': // Down
                         impulseDirection.set(0, -1, 0);
                         break;
+                    case 'r': // Toggle camera view
+                        toggleCameraView();
+                        break;
                 }
 
                 if (impulseDirection.length() > 0) {
@@ -333,8 +353,9 @@
 
             // Button event listener
             document.getElementById('reset-view-button').addEventListener('click', () => {
-                camera.position.set(0, 2, 6);
-                camera.lookAt(new THREE.Vector3(0, 1.5, 0));
+                camera.position.set(0, 5, 10);
+                camera.lookAt(new THREE.Vector3(0, 2, 0));
+                isTopView = false;
                 // Reset Steve's position and orientation
                 for (const name in bodies) {
                     bodies[name].position.set(...partData[name].pos);
