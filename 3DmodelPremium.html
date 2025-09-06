@@ -61,6 +61,8 @@
             <p><strong>D:</strong> Толкнуть вправо</p>
             <p><strong>W:</strong> Толкнуть вперёд</p>
             <p><strong>S:</strong> Толкнуть назад</p>
+            <p><strong>Q:</strong> Толкнуть вверх</p>
+            <p><strong>E:</strong> Толкнуть вниз</p>
         </div>
         <div id="button-container">
             <button id="reset-view-button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full shadow-lg">Сбросить вид</button>
@@ -124,8 +126,8 @@
             world.addBody(groundBody);
 
             // Invisible cubic barrier
-            const barrierSize = 10; // The size of the barrier cube
-            const wallThickness = 1; // Thickness of the invisible walls
+            const barrierSize = 20; // Увеличена, чтобы дать больше места
+            const wallThickness = 1; // Возвращена к исходному значению
 
             // Top wall
             const topWallShape = new CANNON.Box(new CANNON.Vec3(barrierSize / 2, wallThickness / 2, barrierSize / 2));
@@ -322,6 +324,12 @@
                         break;
                     case 'd': // Right
                         impulseDirection.set(1, 0, 0);
+                        break;
+                    case 'q': // Up
+                        impulseDirection.set(0, 1, 0);
+                        break;
+                    case 'e': // Down
+                        impulseDirection.set(0, -1, 0);
                         break;
                 }
 
