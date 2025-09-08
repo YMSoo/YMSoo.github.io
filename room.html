@@ -53,7 +53,7 @@
     <div id="overlay">
         <h1 class="text-4xl font-bold mb-4">Интерактивная 3D Комната</h1>
         <p class="text-lg">Нажмите, чтобы начать</p>
-        <p id="instructions" class="text-sm">Используйте W, A, S, D для движения и мышь для осмотра. Нажмите Esc, чтобы выйти.</p>
+        <p id="instructions" class="text-sm">Используйте W, A, S, D для движения, мышь для осмотра и пробел для прыжка.</p>
     </div>
     
     <script>
@@ -74,13 +74,15 @@
             scene.add(ambientLight);
 
             const pointLight = new THREE.PointLight(0xffffff, 1, 100);
-            pointLight.position.set(0, 5, 0); 
+            pointLight.position.set(0, 2.375, 0); 
             scene.add(pointLight);
 
             // Геометрия и материалы для комнаты
             const roomSize = 10;
             const wallColor = 0x6b7280;
             const floorColor = 0x2d3748;
+            const furnitureColor = 0x8B0000;
+            const stairsColor = 0x7a8393;
 
             const roomGroup = new THREE.Group();
             scene.add(roomGroup);
@@ -95,7 +97,7 @@
 
             // Стены (BoxGeometry и один материал)
             const wallMaterial = new THREE.MeshLambertMaterial({ color: wallColor, side: THREE.BackSide });
-            const wallHeight = 5;
+            const wallHeight = 4.75;
             const wallThickness = 0.1;
 
             const backWall = new THREE.Mesh(new THREE.BoxGeometry(roomSize, wallHeight, wallThickness), wallMaterial);
@@ -134,21 +136,21 @@
 
             // Добавление номеров на стены
             const backWallNumber = createNumberPlane('1');
-            backWallNumber.position.set(0, 2.5, -roomSize / 2 + 0.05);
+            backWallNumber.position.set(0, wallHeight / 2, -roomSize / 2 + 0.05);
             roomGroup.add(backWallNumber);
 
             const frontWallNumber = createNumberPlane('2');
-            frontWallNumber.position.set(0, 2.5, roomSize / 2 - 0.05);
+            frontWallNumber.position.set(0, wallHeight / 2, roomSize / 2 - 0.05);
             frontWallNumber.rotation.y = Math.PI;
             roomGroup.add(frontWallNumber);
 
             const leftWallNumber = createNumberPlane('3');
-            leftWallNumber.position.set(-roomSize / 2 + 0.05, 2.5, 0);
+            leftWallNumber.position.set(-roomSize / 2 + 0.05, wallHeight / 2, 0);
             leftWallNumber.rotation.y = Math.PI / 2;
             roomGroup.add(leftWallNumber);
 
             const rightWallNumber = createNumberPlane('4');
-            rightWallNumber.position.set(roomSize / 2 - 0.05, 2.5, 0);
+            rightWallNumber.position.set(roomSize / 2 - 0.05, wallHeight / 2, 0);
             rightWallNumber.rotation.y = -Math.PI / 2;
             roomGroup.add(rightWallNumber);
 
@@ -231,13 +233,37 @@
             tvStandGroup.rotation.y = -Math.PI / 2; // Поворот всей группы
             roomGroup.add(tvStandGroup);
 
+            // Добавление лестницы к стене 2 и ее поворот
+            const stairsGroup = new THREE.Group();
+            const stairSteps = [];
+            const stepWidth = 4.0;
+            const stepHeight = 0.2;
+            const stepDepth = 0.3;
+            const numberOfSteps = 24;
+            const stairsMaterial = new THREE.MeshLambertMaterial({ color: stairsColor });
+
+            for (let i = 0; i < numberOfSteps; i++) {
+                const step = new THREE.Mesh(new THREE.BoxGeometry(stepWidth, stepHeight, stepDepth), stairsMaterial);
+                step.position.set(
+                    0,
+                    (i * stepHeight) + (stepHeight / 2),
+                    (i * stepDepth)
+                );
+                stairsGroup.add(step);
+                stairSteps.push(step);
+            }
+
+            stairsGroup.rotation.y = Math.PI / 2; // Поворот лестницы
+            stairsGroup.position.set(-2.0, 0, roomSize / 2 - 0.05); // Позиция лестницы
+            roomGroup.add(stairsGroup);
+
             // Массив для хранения всех объектов для проверки столкновений
             const collisionObjects = [
                 backWall, frontWall, leftWall, rightWall,
                 tableGroup,
                 chairGroup,
                 sofaGroup,
-                tvStandGroup,
+                tvStandGroup
             ];
 
             // Управление игроком с помощью PointerLockControls
@@ -266,6 +292,11 @@
             const velocity = new THREE.Vector3();
             const direction = new THREE.Vector3();
             const movementSpeed = 0.05;
+            const playerHeight = 1.5;
+            const gravity = -0.01; // Гравитация в 5 раз слабее
+            const jumpPower = 0.2;
+
+            let canJump = false;
             let moveForward = false;
             let moveBackward = false;
             let moveLeft = false;
@@ -285,6 +316,12 @@
                         break;
                     case 'KeyD':
                         moveRight = true;
+                        break;
+                    case 'Space':
+                        if (canJump) {
+                            velocity.y = jumpPower;
+                            canJump = false;
+                        }
                         break;
                 }
             });
@@ -328,20 +365,21 @@
                     direction.x = Number(moveRight) - Number(moveLeft);
                     direction.normalize();
 
-                    // Расчет скорости
-                    velocity.z = direction.z * movementSpeed;
-                    velocity.x = direction.x * movementSpeed;
-
                     // Применение движения
-                    controls.moveForward(velocity.z);
-                    controls.moveRight(velocity.x);
+                    controls.moveForward(direction.z * movementSpeed);
+                    controls.moveRight(direction.x * movementSpeed);
 
+                    // Применение гравитации и обновление вертикальной скорости
+                    velocity.y += gravity;
+                    camera.position.y += velocity.y;
+                    
                     // Проверка столкновений
                     let collisionDetected = false;
                     const playerBox = new THREE.Box3();
                     const playerSize = new THREE.Vector3(0.5, 1.5, 0.5);
                     playerBox.setFromCenterAndSize(camera.position, playerSize);
 
+                    // Столкновения со стенами и мебелью
                     for (const object of collisionObjects) {
                         const objectBox = new THREE.Box3().setFromObject(object);
                         if (playerBox.intersectsBox(objectBox)) {
@@ -354,6 +392,33 @@
                     if (collisionDetected) {
                         camera.position.copy(oldPosition);
                     }
+
+                    // Проверка столкновения с полом
+                    if (camera.position.y <= playerHeight) {
+                        camera.position.y = playerHeight;
+                        velocity.y = 0;
+                        canJump = true;
+                    }
+
+                    // Проверка столкновения со ступеньками
+                    let onStair = false;
+                    stairSteps.forEach(step => {
+                        const stepWorldPos = new THREE.Vector3();
+                        step.getWorldPosition(stepWorldPos);
+
+                        const stepWorldBox = new THREE.Box3().setFromObject(step);
+                        
+                        // Check if player is on the step
+                        if (playerBox.intersectsBox(stepWorldBox)) {
+                            // Check if the player is above the step
+                            if (oldPosition.y > stepWorldPos.y + stepHeight / 2) {
+                                camera.position.y = stepWorldPos.y + stepHeight / 2 + playerHeight / 2;
+                                velocity.y = 0;
+                                canJump = true;
+                                onStair = true;
+                            }
+                        }
+                    });
                 }
                 
                 renderer.render(scene, camera);
