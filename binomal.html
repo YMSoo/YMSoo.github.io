@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pascal's Triangle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .triangle-cell {
+            transition: all 0.3s ease-in-out;
+        }
+        .triangle-cell:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10 w-full max-w-4xl space-y-8">
+        <h1 class="text-3xl md:text-5xl font-extrabold text-center text-indigo-600 mb-4 tracking-tight">Pascal's Triangle</h1>
+        <p class="text-center text-lg md:text-xl text-gray-700">Explore the numbers and their connection to binomial expansion.</p>
+
+        <!-- Control Section -->
+        <div class="flex flex-col items-center space-y-4">
+            <label for="rows" class="text-xl font-semibold text-gray-800">
+                Number of Rows: <span id="rowsValue">8</span>
+            </label>
+            <input type="range" id="rows" min="1" max="15" value="8"
+                   aria-label="Number of rows for Pascal's Triangle"
+                   aria-valuenow="8" aria-valuemin="1" aria-valuemax="15"
+                   class="w-full md:w-1/2 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
+        </div>
+
+        <!-- Custom Variable Inputs -->
+        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8 mt-4">
+            <div class="flex items-center space-x-2">
+                <label for="aValue" class="text-lg font-medium text-gray-700">Значение для A:</label>
+                <input type="text" id="aValue" value="a" placeholder="e.g., -2x^3" class="w-24 px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="flex items-center space-x-2">
+                <label for="bValue" class="text-lg font-medium text-gray-700">Значение для B:</label>
+                <input type="text" id="bValue" value="b" placeholder="e.g., 5" class="w-24 px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+        </div>
+        
+        <!-- Triangle Display Area -->
+        <div id="triangle-container" class="w-full flex justify-center overflow-auto p-4 bg-gray-50 rounded-lg shadow-inner">
+            <div id="pascals-triangle" class="flex flex-col items-center space-y-2 text-sm md:text-base"></div>
+        </div>
+
+        <!-- Binomial Expansion Area -->
+        <div id="expansion-container" class="w-full mt-8 bg-gray-50 p-6 rounded-lg shadow-inner">
+            <h2 class="text-2xl md:text-3xl font-bold text-center text-indigo-500 mb-4">Binomial Expansion</h2>
+            <div id="binomial-expansion" class="text-center text-lg md:text-xl text-gray-800 overflow-x-auto font-mono"
+                 aria-live="polite"></div>
+            <p id="expansion-description" class="text-center text-sm md:text-base text-gray-500 mt-2 italic"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const rowsInput = document.getElementById('rows');
+            const rowsValueSpan = document.getElementById('rowsValue');
+            const aValueInput = document.getElementById('aValue');
+            const bValueInput = document.getElementById('bValue');
+            const triangleContainer = document.getElementById('pascals-triangle');
+            const expansionDisplay = document.getElementById('binomial-expansion');
+            const expansionDescription = document.getElementById('expansion-description');
+
+            /**
+             * Parses a string term into its coefficient, variable, and exponent parts.
+             * @param {string} termString The input string (e.g., "5", "-2x^3", "y").
+             * @returns {{coefficient: number, variable: string, exponent: number}} An object with the parsed parts.
+             */
+            function parseTerm(termString) {
+                const term = termString.trim();
+                if (!term) return { coefficient: 1, variable: '', exponent: 1 };
+                
+                // Regex to capture coefficient, variable, and exponent
+                const match = term.match(/^([+-]?\d*\.?\d*)?([a-zA-Z]*)?(\^\-?\d+)?$/);
+                
+                if (!match) return { coefficient: 1, variable: term, exponent: 1 };
+
+                let coefficient = parseFloat(match[1]);
+                const variable = match[2] || '';
+                const exponentMatch = match[3];
+
+                if (isNaN(coefficient)) {
+                    if (match[1] === '-') {
+                        coefficient = -1;
+                    } else {
+                        coefficient = 1;
+                    }
+                }
+                
+                let exponent = 1;
+                if (exponentMatch) {
+                    exponent = parseInt(exponentMatch.substring(1), 10);
+                }
+
+                if (!variable) {
+                    exponent = 1;
+                }
+
+                return { coefficient: coefficient, variable: variable, exponent: exponent };
+            }
+
+            // Function to generate the triangle
+            function generatePascalsTriangle(rows) {
+                // Clear previous content
+                triangleContainer.innerHTML = '';
+                expansionDisplay.innerHTML = '';
+                expansionDescription.innerHTML = '';
+
+                let triangle = [];
+
+                for (let i = 0; i < rows; i++) {
+                    let row = [];
+                    let rowDiv = document.createElement('div');
+                    rowDiv.classList.add('flex', 'space-x-4', 'justify-center', 'py-1');
+
+                    for (let j = 0; j <= i; j++) {
+                        let cellValue;
+                        if (j === 0 || j === i) {
+                            cellValue = 1;
+                        } else {
+                            cellValue = triangle[i - 1][j - 1] + triangle[i - 1][j];
+                        }
+                        row.push(cellValue);
+
+                        let cell = document.createElement('span');
+                        cell.classList.add(
+                            'px-3', 'py-1', 'rounded-full', 'bg-indigo-200', 'text-indigo-800', 'font-semibold',
+                            'min-w-[40px]', 'text-center', 'triangle-cell', 'opacity-0'
+                        );
+                        cell.textContent = cellValue;
+                        rowDiv.appendChild(cell);
+                    }
+                    triangle.push(row);
+                    triangleContainer.appendChild(rowDiv);
+
+                    // Animate the cells to fade in
+                    setTimeout(() => {
+                        Array.from(rowDiv.children).forEach(cell => {
+                            cell.classList.remove('opacity-0');
+                            cell.classList.add('opacity-100');
+                        });
+                    }, i * 50); // Stagger the animation
+                }
+
+                if (rows > 0) {
+                    // Get and parse values from the new input fields
+                    const aValue = aValueInput.value || 'a';
+                    const bValue = bValueInput.value || 'b';
+                    displayBinomialExpansion(triangle[rows - 1], rows - 1, aValue, bValue);
+                }
+            }
+
+            // Function to display the binomial expansion
+            function displayBinomialExpansion(coefficients, n, a, b) {
+                let expression = '';
+                
+                // Parse the input terms to handle coefficients, variables and exponents
+                const aParts = parseTerm(a);
+                const bParts = parseTerm(b);
+                
+                const isANumber = aParts.variable === '';
+                const isBNumber = bParts.variable === '';
+                const base = `(${a} + ${b})<sup>${n}</sup>`;
+
+                // If both inputs are pure numbers, calculate and display the single simplified value
+                if (isANumber && isBNumber) {
+                    const result = Math.pow(aParts.coefficient + bParts.coefficient, n);
+                    expansionDisplay.innerHTML = `${base} = ${result}`;
+                    expansionDescription.innerHTML = `Упрощенное значение для (${a} + ${b}) в степени ${n}.`;
+                    return;
+                }
+
+                // If at least one input is a variable, construct the simplified polynomial
+                for (let i = 0; i < coefficients.length; i++) {
+                    const a_power_base = n - i;
+                    const b_power_base = i;
+                    
+                    // Calculate the new powers based on the input exponents
+                    const a_final_power = a_power_base * aParts.exponent;
+                    const b_final_power = b_power_base * bParts.exponent;
+
+                    // Combine coefficient from triangle with parsed coefficients
+                    let simplifiedCoefficient = coefficients[i] * Math.pow(aParts.coefficient, a_power_base) * Math.pow(bParts.coefficient, b_power_base);
+                    
+                    // Build the term string
+                    let termString = '';
+
+                    // Add simplified coefficient
+                    if (simplifiedCoefficient === 1 && (aParts.variable || bParts.variable)) {
+                        // Don't add a coefficient if it's 1 and there's a variable
+                    } else if (simplifiedCoefficient === -1 && (aParts.variable || bParts.variable)) {
+                        termString += '-';
+                    } else if (simplifiedCoefficient !== 0) {
+                        termString += simplifiedCoefficient;
+                    }
+
+                    // Add variables with their new powers
+                    if (aParts.variable && a_final_power !== 0) {
+                        termString += aParts.variable;
+                        if (a_final_power !== 1) {
+                            termString += `<sup>${a_final_power}</sup>`;
+                        }
+                    }
+                    if (bParts.variable && b_final_power !== 0) {
+                        termString += bParts.variable;
+                        if (b_final_power !== 1) {
+                            termString += `<sup>${b_final_power}</sup>`;
+                        }
+                    }
+
+                    // Handle case where a term is just the coefficient (e.g., if aParts or bParts is 0)
+                    if (simplifiedCoefficient === 0) {
+                        // Skip adding this term
+                    } else {
+                        // Add plus or minus sign
+                        if (i > 0 && simplifiedCoefficient >= 0) {
+                            expression += ' + ';
+                        } else if (i > 0) {
+                            expression += ' ';
+                        }
+                        expression += termString;
+                    }
+                }
+
+                // If the expression is empty (e.g., all terms were 0), show 0
+                if (expression.trim() === '') {
+                    expression = '0';
+                }
+                
+                expansionDisplay.innerHTML = `${base} = ${expression}`;
+                expansionDescription.innerHTML = `Коэффициенты соответствуют строке ${n} треугольника Паскаля (начиная со строки 0).`;
+            }
+
+            // Initial generation and event listener setup
+            function updateAll() {
+                const numRows = parseInt(rowsInput.value);
+                rowsValueSpan.textContent = numRows;
+                rowsInput.setAttribute('aria-valuenow', numRows);
+                generatePascalsTriangle(numRows);
+            }
+
+            rowsInput.addEventListener('input', updateAll);
+            aValueInput.addEventListener('input', updateAll);
+            bValueInput.addEventListener('input', updateAll);
+
+            // Initial render
+            updateAll();
+        });
+    </script>
+</body>
+</html>
