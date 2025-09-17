@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive XY Plot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        canvas {
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .slider-container label {
+            width: 8rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-xl w-full text-center">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-6">2D XY Plot</h1>
+        
+
+        <!-- Stopwatch Display -->
+        <p id="stopwatchDisplay" class="text-xl font-bold text-gray-800 mb-2">Time: 0.00s</p>
+        
+        <!-- Distance Display -->
+        <p id="distanceDisplay" class="text-xl font-bold text-gray-800 mb-4">Distance: 0.00 units</p>
+        
+        <!-- Speed Controls -->
+        <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8 mb-6">
+            <div class="w-full">
+                <div class="slider-container">
+                    <label for="point1SpeedSlider" class="text-sm font-semibold text-gray-700">Point 1 Speed:</label>
+                    <input type="range" id="point1SpeedSlider" min="0.1" max="5" step="0.1" value="1" class="w-2/3 md:w-full">
+                    <span id="point1SpeedValue" class="text-gray-600 text-sm w-12 text-right">1.0</span>
+                </div>
+                <div class="slider-container">
+                    <label for="point2SpeedSlider" class="text-sm font-semibold text-gray-700">Point 2 Speed:</label>
+                    <input type="range" id="point2SpeedSlider" min="0.1" max="5" step="0.1" value="1" class="w-2/3 md:w-full">
+                    <span id="point2SpeedValue" class="text-gray-600 text-sm w-12 text-right">1.0</span>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="plotCanvas" class="w-full h-auto" width="600" height="400"></canvas>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const canvas = document.getElementById('plotCanvas');
+            const ctx = canvas.getContext('2d');
+            const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+            const distanceDisplay = document.getElementById('distanceDisplay');
+            const point1SpeedSlider = document.getElementById('point1SpeedSlider');
+            const point1SpeedValue = document.getElementById('point1SpeedValue');
+            const point2SpeedSlider = document.getElementById('point2SpeedSlider');
+            const point2SpeedValue = document.getElementById('point2SpeedValue');
+            
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Variables for animation
+            let point1X = 0; // Current X position of point 1
+            let point1Y = 0; // Current Y position of point 1
+            let point1Speed = parseFloat(point1SpeedSlider.value); // Speed from slider
+
+            let point2X = 10; // X position of point 2 (fixed)
+            let point2Y = 0; // Current Y position of point 2
+            let point2Speed = parseFloat(point2SpeedSlider.value); // Speed from slider
+
+            let lastTime = 0;
+            let isStopped = false; // Flag to stop the animation
+
+            // Stopwatch variables
+            let startTime = 0;
+
+            // Arrays to store the path history
+            const point1Path = [];
+            const point2Path = [];
+
+            // Define the viewport size in plot units
+            const plotViewWidth = 48;
+            const plotViewHeight = 32;
+
+            // Calculate scales based on the viewport size
+            const xScale = width / plotViewWidth;
+            const yScale = height / plotViewHeight;
+            const canvasCenterX = width / 2;
+            const canvasCenterY = height / 2;
+
+            // Event listeners for speed sliders
+            point1SpeedSlider.addEventListener('input', (e) => {
+                point1Speed = parseFloat(e.target.value);
+                point1SpeedValue.textContent = point1Speed.toFixed(1);
+            });
+
+            point2SpeedSlider.addEventListener('input', (e) => {
+                point2Speed = parseFloat(e.target.value);
+                point2SpeedValue.textContent = point2Speed.toFixed(1);
+            });
+
+            // Function to convert plot coordinates to canvas coordinates, with the camera locked on point 1
+            function toCanvasX(x) {
+                return canvasCenterX + (x - point1X) * xScale;
+            }
+
+            function toCanvasY(y) {
+                return canvasCenterY - (y - point1Y) * yScale;
+            }
+
+            // Function to draw axes and grid lines
+            function drawAxes() {
+                // Calculate the canvas position of the origin relative to point 1
+                const originX = toCanvasX(0);
+                const originY = toCanvasY(0);
+
+                ctx.strokeStyle = '#d1d5db';
+                ctx.lineWidth = 1;
+
+                // Draw horizontal grid lines and labels
+                for (let i = Math.floor(point1Y - plotViewHeight / 2); i <= Math.ceil(point1Y + plotViewHeight / 2); i++) {
+                    const y = toCanvasY(i);
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                    ctx.fillStyle = '#6b7280';
+                    ctx.font = '12px sans-serif';
+                    ctx.fillText(i, originX + 5, y - 5);
+                }
+
+                // Draw vertical grid lines and labels
+                for (let i = Math.floor(point1X - plotViewWidth / 2); i <= Math.ceil(point1X + plotViewWidth / 2); i++) {
+                    const x = toCanvasX(i);
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                    ctx.fillStyle = '#6b7280';
+                    ctx.font = '12px sans-serif';
+                    ctx.fillText(i, x + 5, originY - 5);
+                }
+
+                // Draw the main axes
+                ctx.strokeStyle = '#4b5563';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, originY);
+                ctx.lineTo(width, originY);
+                ctx.moveTo(originX, 0);
+                ctx.lineTo(originX, height);
+                ctx.stroke();
+            }
+
+            // Function to draw a point
+            function drawPoint(x, y, label) {
+                const canvasX = toCanvasX(x);
+                const canvasY = toCanvasY(y);
+
+                // Draw the circle
+                ctx.beginPath();
+                ctx.arc(canvasX, canvasY, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#3b82f6';
+                ctx.fill();
+
+                // Draw the label
+                ctx.fillStyle = '#1f2937';
+                ctx.font = '14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, canvasX, canvasY - 15);
+            }
+
+            // Function to draw the paths of the points
+            function drawPaths() {
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1;
+
+                // Draw point 1 path
+                ctx.beginPath();
+                if (point1Path.length > 0) {
+                    ctx.moveTo(toCanvasX(point1Path[0].x), toCanvasY(point1Path[0].y));
+                    for (let i = 1; i < point1Path.length; i++) {
+                        ctx.lineTo(toCanvasX(point1Path[i].x), toCanvasY(point1Path[i].y));
+                    }
+                }
+                ctx.stroke();
+
+                // Draw point 2 path
+                ctx.beginPath();
+                if (point2Path.length > 0) {
+                    ctx.moveTo(toCanvasX(point2Path[0].x), toCanvasY(point2Path[0].y));
+                    for (let i = 1; i < point2Path.length; i++) {
+                        ctx.lineTo(toCanvasX(point2Path[i].x), toCanvasY(point2Path[i].y));
+                    }
+                }
+                ctx.stroke();
+            }
+
+            // Main drawing function
+            function drawPlot() {
+                // Clear the canvas
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw the paths
+                drawPaths();
+
+                // Draw the axes
+                drawAxes();
+
+                // Draw the points
+                drawPoint(point1X, point1Y, '1');
+                drawPoint(point2X, point2Y, '2');
+            }
+            
+            // Animation loop
+            function animate(timestamp) {
+                if (!lastTime) {
+                    lastTime = timestamp;
+                    startTime = timestamp; // Initialize stopwatch start time
+                }
+                const deltaTime = (timestamp - lastTime) / 1000; // Convert to seconds
+                lastTime = timestamp;
+
+                if (!isStopped) {
+                    // Update the position of point 2 (moving straight up)
+                    point2Y += point2Speed * deltaTime;
+
+                    // Calculate the direction vector from point 1 to point 2
+                    const dx = point2X - point1X;
+                    const dy = point2Y - point1Y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    // Stop the animation if the points are close enough
+                    if (distance < 0.1) {
+                        isStopped = true;
+                    }
+
+                    // Update the position of point 1 (moving towards point 2)
+                    if (distance > 0) {
+                        const directionX = dx / distance;
+                        const directionY = dy / distance;
+                        point1X += directionX * point1Speed * deltaTime;
+                        point1Y += directionY * point1Speed * deltaTime;
+                    }
+                    
+                    // Save the current positions to the path history only if the animation is running
+                    point1Path.push({ x: point1X, y: point1Y });
+                    point2Path.push({ x: point2X, y: point2Y });
+                    
+                    // Update the stopwatch and distance display
+                    const elapsedTime = (timestamp - startTime) / 1000;
+                    stopwatchDisplay.textContent = `Time: ${elapsedTime.toFixed(2)}s`;
+                    distanceDisplay.textContent = `Distance: ${distance.toFixed(2)} units`;
+                }
+
+                // Redraw the plot
+                drawPlot();
+
+                // Continue the animation loop
+                requestAnimationFrame(animate);
+            }
+
+            // Start the animation
+            requestAnimationFrame(animate);
+        };
+    </script>
+</body>
+</html>
