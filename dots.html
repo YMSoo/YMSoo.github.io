@@ -31,6 +31,10 @@
     <div class="bg-white rounded-xl shadow-2xl p-8 max-w-xl w-full text-center">
         <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-6">2D XY Plot</h1>
         
+        <!-- Action Button -->
+        <button id="startButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md mb-6 transition-all duration-300 transform hover:scale-105">
+            Start Simulation
+        </button>
 
         <!-- Stopwatch Display -->
         <p id="stopwatchDisplay" class="text-xl font-bold text-gray-800 mb-2">Time: 0.00s</p>
@@ -67,6 +71,7 @@
             const point1SpeedValue = document.getElementById('point1SpeedValue');
             const point2SpeedSlider = document.getElementById('point2SpeedSlider');
             const point2SpeedValue = document.getElementById('point2SpeedValue');
+            const startButton = document.getElementById('startButton');
             
             const width = canvas.width;
             const height = canvas.height;
@@ -81,7 +86,7 @@
             let point2Speed = parseFloat(point2SpeedSlider.value); // Speed from slider
 
             let lastTime = 0;
-            let isStopped = false; // Flag to stop the animation
+            let isStopped = true; // Flag to stop the animation initially
 
             // Stopwatch variables
             let startTime = 0;
@@ -99,6 +104,26 @@
             const yScale = height / plotViewHeight;
             const canvasCenterX = width / 2;
             const canvasCenterY = height / 2;
+
+            // Event listener for the start/restart button
+            startButton.addEventListener('click', () => {
+                // Reset positions and clear paths to restart the simulation
+                point1X = 0;
+                point1Y = 0;
+                point2X = 10;
+                point2Y = 0;
+                point1Path.length = 0;
+                point2Path.length = 0;
+                
+                // Start the animation and stopwatch
+                isStopped = false;
+                lastTime = 0;
+                startTime = 0;
+                
+                // Update button text
+                startButton.textContent = 'Restart Simulation';
+            });
+
 
             // Event listeners for speed sliders
             point1SpeedSlider.addEventListener('input', (e) => {
@@ -226,6 +251,13 @@
             
             // Animation loop
             function animate(timestamp) {
+                // If the animation is stopped, do nothing but continue the loop
+                if (isStopped) {
+                    drawPlot();
+                    requestAnimationFrame(animate);
+                    return;
+                }
+                
                 if (!lastTime) {
                     lastTime = timestamp;
                     startTime = timestamp; // Initialize stopwatch start time
@@ -233,37 +265,36 @@
                 const deltaTime = (timestamp - lastTime) / 1000; // Convert to seconds
                 lastTime = timestamp;
 
-                if (!isStopped) {
-                    // Update the position of point 2 (moving straight up)
-                    point2Y += point2Speed * deltaTime;
+                // Update the position of point 2 (moving straight up)
+                point2Y += point2Speed * deltaTime;
 
-                    // Calculate the direction vector from point 1 to point 2
-                    const dx = point2X - point1X;
-                    const dy = point2Y - point1Y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+                // Calculate the direction vector from point 1 to point 2
+                const dx = point2X - point1X;
+                const dy = point2Y - point1Y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    // Stop the animation if the points are close enough
-                    if (distance < 0.1) {
-                        isStopped = true;
-                    }
-
-                    // Update the position of point 1 (moving towards point 2)
-                    if (distance > 0) {
-                        const directionX = dx / distance;
-                        const directionY = dy / distance;
-                        point1X += directionX * point1Speed * deltaTime;
-                        point1Y += directionY * point1Speed * deltaTime;
-                    }
-                    
-                    // Save the current positions to the path history only if the animation is running
-                    point1Path.push({ x: point1X, y: point1Y });
-                    point2Path.push({ x: point2X, y: point2Y });
-                    
-                    // Update the stopwatch and distance display
-                    const elapsedTime = (timestamp - startTime) / 1000;
-                    stopwatchDisplay.textContent = `Time: ${elapsedTime.toFixed(2)}s`;
-                    distanceDisplay.textContent = `Distance: ${distance.toFixed(2)} units`;
+                // Stop the animation if the points are close enough
+                if (distance < 0.1) {
+                    isStopped = true;
                 }
+
+                // Update the position of point 1 (moving towards point 2)
+                if (distance > 0) {
+                    const directionX = dx / distance;
+                    const directionY = dy / distance;
+                    point1X += directionX * point1Speed * deltaTime;
+                    point1Y += directionY * point1Speed * deltaTime;
+                }
+                
+                // Save the current positions to the path history only if the animation is running
+                point1Path.push({ x: point1X, y: point1Y });
+                point2Path.push({ x: point2X, y: point2Y });
+                
+                // Update the stopwatch and distance display
+                const elapsedTime = (timestamp - startTime) / 1000;
+                stopwatchDisplay.textContent = `Time: ${elapsedTime.toFixed(2)}s`;
+                distanceDisplay.textContent = `Distance: ${distance.toFixed(2)} units`;
+                
 
                 // Redraw the plot
                 drawPlot();
@@ -272,7 +303,7 @@
                 requestAnimationFrame(animate);
             }
 
-            // Start the animation
+            // Start the animation loop on window load, but keep it in a paused state
             requestAnimationFrame(animate);
         };
     </script>
