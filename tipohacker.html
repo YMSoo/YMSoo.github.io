@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>/// ACCESSING MAIN SYSTEM ///</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 10px;
+            overflow: hidden; /* Убираем прокрутку */
+        }
+
+        #code-container {
+            width: 100%;
+            height: 100vh;
+            white-space: pre-wrap; /* Позволяет переносить длинные строки */
+            word-wrap: break-word; /* Переносит слова, чтобы они не выходили за рамки */
+            font-size: 14px;
+        }
+        
+        /* Эффект мигающего курсора */
+        .cursor::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            from, to {
+                color: transparent;
+            }
+            50% {
+                color: #0f0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<pre id="code-container" class="cursor"></pre>
+
+<script>
+    // Код, который будет "печататься". Вы можете заменить его на любой другой.
+    const code = `
+/*
+ * linux/kernel/fork.c
+ *
+ * Copyright (C) 1991, 1992  Linus Torvalds
+ */
+
+#include <linux/slab.h>
+#include <linux/init.h>
+#include <linux/unistd.h>
+#include <linux/module.h>
+#include <linux/vmalloc.h>
+#include <linux/completion.h>
+#include <linux/personality.h>
+#include <linux/mempolicy.h>
+#include <linux/sem.h>
+#include <linux/file.h>
+#include <linux/fdtable.h>
+#include <linux/iocontext.h>
+#include <linux/key.h>
+#include <linux/binfmts.h>
+#include <linux/mman.h>
+#include <linux/mmu_notifier.h>
+#include <linux/fs.h>
+#include <linux/nsproxy.h>
+#include <linux/capability.h>
+#include <linux/cpu.h>
+#include <linux/cgroup.h>
+#include <linux/security.h>
+#include <linux/hugetlb.h>
+#include <linux/seccomp.h>
+#include <linux/swap.h>
+#include <linux/syscalls.h>
+#include <linux/jiffies.h>
+#include <linux/futex.h>
+#include <linux/compat.h>
+#include <linux/task_io_accounting_ops.h>
+#include <linux/random.h>
+#include <linux/user_namespace.h>
+
+#include <asm/pgtable.h>
+#include <asm/pgalloc.h>
+#include <asm/uaccess.h>
+#include <asm/mmu_context.h>
+
+/*
+ * Minimum number of threads to boot the kernel.
+ */
+#define MIN_THREADS 20
+
+/*
+ * Maximum number of threads; configurable via /proc/sys/kernel/threads-max.
+ *
+ * This value is also a ceiling for the number of tasks in a thread group
+ * (see can_fork() below), so it should be chosen with care.
+ *
+ * The default value is calculated as follows:
+ *
+ * threads-max = mempages / (8 * THREAD_SIZE / PAGE_SIZE)
+ *
+ * for a machine with one GigaByte of memory, this yields about 20000.
+ */
+#define MAX_THREADS (1 << 14)
+
+/*
+ * This is the default maximum number of threads for a given user.
+ * It is calculated in the same way as the system-wide maximum,
+ * but it can be overridden by the sysctl.
+ */
+unsigned int max_threads;
+
+static int __init max_threads_init(void)
+{
+    max_threads = MAX_THREADS;
+    return 0;
+}
+core_initcall(max_threads_init);
+
+static int dup_mmap(struct mm_struct *mm, struct mm_struct *oldmm)
+{
+    struct vm_area_struct *mpnt, *tmp, *prev, **pprev;
+    struct rb_node **rb_link, *rb_parent;
+    int retval;
+    unsigned long charge;
+
+    down_write(&oldmm->mmap_sem);
+    flush_cache_mm(oldmm);
+    /*
+     * Not linked in yet - no deadlock potential:
+     */
+    down_write_nested(&mm->mmap_sem, SINGLE_DEPTH_NESTING);
+
+    /*
+     * Free the old vmas of the new process before doing any
+     * allocations. This is not strictly necessary, but it helps
+     * to keep track of the memory usage of the new process.
+     */
+    unmap_vmas(&mm->mmap, 0, -1);
+
+    /*
+     * A new process has no vmas yet.
+     */
+    mm->mmap = NULL;
+    mm->mmap_cache = NULL;
+
+    /*
+     * Copy the vmas from the old process.
+     */
+    pprev = &mm->mmap;
+    rb_link = &mm->mmap->rb_node.rb_right;
+    rb_parent = NULL;
+    prev = NULL;
+    for (mpnt = oldmm->mmap; mpnt; mpnt = mpnt->vm_next) {
+        struct file *file;
+
+        if (mpnt->vm_flags & VM_DONTCOPY)
+            continue;
+        charge = 0;
+        if (mpnt->vm_flags & VM_ACCOUNT) {
+            unsigned long len = (mpnt->vm_end - mpnt->vm_start) >> PAGE_SHIFT;
+            if (security_vm_enough_memory_mm(oldmm, len))
+                goto fail_nomem;
+            charge = len;
+        }
+        tmp = kmem_cache_alloc(vm_area_cachep, GFP_KERNEL);
+        if (!tmp)
+            goto fail_nomem_charge;
+        *tmp = *mpnt;
+        INIT_LIST_HEAD(&tmp->anon_vma_chain);
+        tmp->vm_mm = mm;
+        tmp->vm_next = NULL;
+        file = tmp->vm_file;
+        if (file) {
+            get_file(file);
+            if (tmp->vm_flags & VM_DENYWRITE)
+                atomic_dec(&file->f_path.dentry->d_inode->i_writecount);
+            if (tmp->vm_flags & VM_SHARED)
+                atomic_inc(&file_count);
+        }
+
+        if (anon_vma_fork(tmp, mpnt))
+            goto fail_nomem_anon_vma_fork;
+
+        *pprev = tmp;
+        pprev = &tmp->vm_next;
+        mm->total_vm += (tmp->vm_end - tmp->vm_start) >> PAGE_SHIFT;
+        if (tmp->vm_flags & VM_LOCKED)
+            mm->locked_vm += (tmp->vm_end - tmp->vm_start) >> PAGE_SHIFT;
+        insert_vm_struct(mm, tmp);
+        prev = tmp;
+    }
+
+    /*
+     * Link the vmas together.
+     */
+    if (mm->mmap)
+        mm->mmap->vm_prev = NULL;
+
+    /*
+     * Finally, copy the page tables.
+     */
+    retval = copy_page_range(mm, oldmm, oldmm->mmap);
+
+out:
+    up_write(&mm->mmap_sem);
+    flush_tlb_mm(oldmm);
+    up_write(&oldmm->mmap_sem);
+    return retval;
+fail_nomem_anon_vma_fork:
+    if (tmp->vm_file)
+        fput(tmp->vm_file);
+    kmem_cache_free(vm_area_cachep, tmp);
+fail_nomem_charge:
+    if (charge)
+        vm_unacct_memory(charge);
+fail_nomem:
+    retval = -ENOMEM;
+    goto out;
+}
+`;
+
+    const codeContainer = document.getElementById('code-container');
+    let index = 0;
+    // Скорость печати в миллисекундах. Чем меньше значение, тем быстрее печать.
+    const typingSpeed = 10;
+
+    function typeCode() {
+        if (index < code.length) {
+            // Добавляем по одному символу за раз
+            codeContainer.textContent += code.charAt(index);
+            index++;
+            // Автоматически прокручиваем страницу вниз
+            window.scrollTo(0, document.body.scrollHeight);
+            setTimeout(typeCode, typingSpeed);
+        } else {
+            // Убираем курсор после завершения "печати"
+            codeContainer.classList.remove('cursor');
+        }
+    }
+
+    // Запускаем функцию
+    typeCode();
+</script>
+
+</body>
+</html>
