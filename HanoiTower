@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Башня Ханой</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        h1 { margin-top: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+
+        .controls {
+            margin: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        label { font-weight: bold; }
+
+        input {
+            padding: 5px;
+            border-radius: 5px;
+            border: none;
+            width: 60px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 8px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #e67e22;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover { background-color: #d35400; }
+        button:active { transform: scale(0.95); }
+
+        /* Игровое поле */
+        .game-area {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 40px; /* Расстояние между башнями */
+            margin-top: 50px;
+        }
+
+        /* Контейнер башни */
+        .tower-wrapper {
+            position: relative;
+            width: 220px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .tower-wrapper:hover {
+            opacity: 0.9;
+        }
+        
+        .tower-wrapper:hover .base {
+            background-color: #95a5a6;
+        }
+
+        /* Стержень (рисуется позади дисков) */
+        .rod {
+            position: absolute;
+            bottom: 20px; /* Высота основания */
+            width: 14px;
+            height: 260px;
+            background-color: #bdc3c7;
+            border-radius: 10px 10px 0 0;
+            z-index: 0;
+            box-shadow: inset 2px 0 5px rgba(0,0,0,0.2);
+        }
+
+        /* Контейнер для дисков (поверх стержня) */
+        .disks-container {
+            position: absolute;
+            bottom: 20px; /* Должен стоять на основании */
+            width: 100%;
+            height: 280px;
+            display: flex;
+            flex-direction: column-reverse; /* Стек снизу вверх */
+            align-items: center; /* Центрируем диски */
+            justify-content: flex-start;
+            z-index: 2; /* Выше стержня */
+            pointer-events: none; /* Клики проходят сквозь, попадая в tower-wrapper */
+        }
+
+        /* Основание башни */
+        .base {
+            width: 100%;
+            height: 20px;
+            background-color: #7f8c8d;
+            border-radius: 10px;
+            z-index: 1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: background 0.2s;
+        }
+
+        /* Сам диск */
+        .disk {
+            height: 28px;
+            border-radius: 14px;
+            border: 2px solid rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.27);
+            position: relative; /* Для z-index */
+        }
+
+        /* Эффект выбора */
+        .disk.selected {
+            transform: translateY(-40px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            border: 2px solid #fff;
+            filter: brightness(1.1);
+        }
+
+        .message-area {
+            text-align: center;
+            height: 60px;
+            margin-top: 20px;
+        }
+
+        .message {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #f1c40f;
+            min-height: 1.5em;
+        }
+
+        .stats {
+            color: #ecf0f1;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Башня Ханой</h1>
+
+    <div class="controls">
+        <label>Дисков:</label>
+        <!-- По умолчанию 6 дисков -->
+        <input type="number" id="diskCount" min="3" max="8" value="6">
+        <button onclick="restartGame()">Новая игра</button>
+    </div>
+
+    <div class="message-area">
+        <div class="message" id="messageBox"></div>
+        <div class="stats">Ходов: <span id="moveCount">0</span></div>
+    </div>
+
+    <div class="game-area">
+        <!-- Башня 0 -->
+        <div class="tower-wrapper" onclick="clickTower(0)">
+            <div class="rod"></div> <!-- Стержень отдельно -->
+            <div class="disks-container" id="tower-0"></div> <!-- Диски отдельно -->
+            <div class="base"></div>
+        </div>
+
+        <!-- Башня 1 -->
+        <div class="tower-wrapper" onclick="clickTower(1)">
+            <div class="rod"></div>
+            <div class="disks-container" id="tower-1"></div>
+            <div class="base"></div>
+        </div>
+
+        <!-- Башня 2 -->
+        <div class="tower-wrapper" onclick="clickTower(2)">
+            <div class="rod"></div>
+            <div class="disks-container" id="tower-2"></div>
+            <div class="base"></div>
+        </div>
+    </div>
+
+    <script>
+        let towers = [[], [], []]; 
+        let selectedTowerIndex = null;
+        let moves = 0;
+        let totalDisks = 6; // Значение по умолчанию обновлено
+
+        // Цвета для дисков (яркая палитра)
+        const colors = [
+            '#FF0000', // Красный
+            '#FF7F00', // Оранжевый
+            '#FFFF00', // Желтый
+            '#00FF00', // Зеленый
+            '#00FFFF', // Голубой
+            '#0000FF', // Синий
+            '#8B00FF', // Фиолетовый
+            '#FF00FF'  // Маджента
+        ];
+
+        function initGame() {
+            towers = [[], [], []];
+            selectedTowerIndex = null;
+            moves = 0;
+            document.getElementById('moveCount').innerText = moves;
+            document.getElementById('messageBox').innerText = '';
+
+            let inputVal = document.getElementById('diskCount').value;
+            totalDisks = parseInt(inputVal);
+            
+            // Ограничения ввода
+            if (totalDisks < 3) totalDisks = 3;
+            if (totalDisks > 8) totalDisks = 8;
+            document.getElementById('diskCount').value = totalDisks;
+
+            // Заполняем первую башню.
+            // 6, 5, 4, 3, 2, 1 (где 1 - самый маленький, сверху)
+            for (let i = totalDisks; i >= 1; i--) {
+                towers[0].push(i);
+            }
+
+            render();
+        }
+
+        function render() {
+            for (let i = 0; i < 3; i++) {
+                const towerDiv = document.getElementById(`tower-${i}`);
+                towerDiv.innerHTML = ''; 
+
+                towers[i].forEach((diskSize, index) => {
+                    const disk = document.createElement('div');
+                    disk.classList.add('disk');
+                    
+                    // Рассчитываем ширину: от 50px до 200px
+                    const minWidth = 50;
+                    const maxWidth = 200;
+                    const step = (maxWidth - minWidth) / totalDisks;
+                    const width = minWidth + (diskSize - 1) * step;
+                    
+                    disk.style.width = width + 'px';
+                    
+                    // Выбираем цвет. Чем меньше диск, тем "холоднее" цвет, или наоборот, зависит от массива
+                    // Используем остаток от деления, чтобы цвета циклились, если дисков много
+                    disk.style.backgroundColor = colors[(totalDisks - diskSize) % colors.length];
+
+                    // Проверка на выбранность
+                    if (selectedTowerIndex === i && index === towers[i].length - 1) {
+                        disk.classList.add('selected');
+                    }
+
+                    towerDiv.appendChild(disk);
+                });
+            }
+        }
+
+        function clickTower(towerIndex) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.innerText = '';
+
+            if (selectedTowerIndex === null) {
+                // Выбор башни
+                if (towers[towerIndex].length > 0) {
+                    selectedTowerIndex = towerIndex;
+                    render();
+                }
+            } 
+            else {
+                // Действие с выбранной башней
+                if (selectedTowerIndex === towerIndex) {
+                    // Отмена выбора
+                    selectedTowerIndex = null;
+                    render();
+                } else {
+                    // Попытка хода
+                    attemptMove(selectedTowerIndex, towerIndex);
+                }
+            }
+        }
+
+        function attemptMove(fromIndex, toIndex) {
+            const fromTower = towers[fromIndex];
+            const toTower = towers[toIndex];
+
+            const diskToMove = fromTower[fromTower.length - 1]; 
+            const topDiskDest = toTower.length > 0 ? toTower[toTower.length - 1] : Infinity;
+
+            if (diskToMove < topDiskDest) {
+                // Ход разрешен
+                toTower.push(fromTower.pop());
+                moves++;
+                document.getElementById('moveCount').innerText = moves;
+                selectedTowerIndex = null;
+                render();
+                checkWin();
+            } else {
+                // Ход запрещен
+                const msg = document.getElementById('messageBox');
+                msg.innerText = 'Нельзя положить большой диск на маленький!';
+                msg.style.color = '#e74c3c';
+                
+                // Анимация тряски (визуальный сброс выбора)
+                selectedTowerIndex = null;
+                render();
+            }
+        }
+
+        function checkWin() {
+            // Цель: собрать все на последней (2) или средней (1) башне.
+            // Стандартно - на последней.
+            if (towers[2].length === totalDisks) {
+                const msg = document.getElementById('messageBox');
+                msg.innerText = `ПОБЕДА! Вы справились за ${moves} ходов.`;
+                msg.style.color = '#2ecc71';
+            }
+        }
+
+        function restartGame() {
+            initGame();
+        }
+
+        // Старт
+        initGame();
+
+    </script>
+</body>
+</html>
