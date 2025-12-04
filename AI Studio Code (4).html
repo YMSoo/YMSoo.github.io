@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>UpNext Pitch Deck</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/night.min.css" id="theme">
+
+    <!-- Улучшенные пользовательские стили -->
+    <style>
+        :root {
+            --r-main-font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --r-heading-font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --r-main-color: #e2e2e2;
+            --r-heading-color: #ffffff;
+            --r-link-color: #42affa;
+            --r-background-color: #191919;
+            --accent-color: #31b572; /* Зеленый акцентный цвет */
+        }
+        
+        .reveal {
+            font-size: 30px;
+        }
+
+        .reveal h1, .reveal h2, .reveal h3 {
+            text-transform: none;
+            font-weight: 600;
+            word-wrap: break-word;
+        }
+
+        .reveal h1 { font-size: 2.5em; }
+        .reveal h2 { font-size: 1.8em; }
+        .reveal h3 { font-size: 1.2em; }
+        
+        .reveal .logo {
+            max-height: 120px;
+            border: none;
+            background: none;
+            box-shadow: none;
+        }
+
+        .reveal .accent { color: var(--accent-color); }
+        .reveal .subtitle { font-size: 0.8em; opacity: 0.8; font-style: italic; }
+
+        .reveal .columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .reveal .column { flex: 1; min-width: 250px; }
+        .reveal .column-icon { font-size: 2.5em; }
+        
+        .competition-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 15px;
+            width: 90%;
+            max-width: 800px;
+            height: 450px;
+            margin: 20px auto;
+        }
+        .grid-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.8em;
+            text-align: center;
+        }
+        .grid-item.upnext {
+            background: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Слайд 1: Титульный -->
+            <section>
+                <h1>UpNext</h1>
+                <h3 class="subtitle">The "Duolingo" for Entrepreneurs</h3>
+                <p style="margin-top: 50px;">
+                    Munar Sagymbay, Founder & CEO<br>
+                    <a href="mailto:munarkz123@gmail.com">munarkz123@gmail.com</a>
+                </p>
+            </section>
+
+            <!-- Слайд 2: Проблема -->
+            <section>
+                <h2>Millions dream of a startup, but get stuck in <span class="accent">"analysis paralysis."</span></h2>
+                <div class="columns" style="margin-top: 40px;">
+                    <div class="column">
+                        <div class="column-icon">🤯</div>
+                        <h3>Information Overload</h3>
+                        <p style="font-size: 0.7em;">Endless theory, no clear action plan.</p>
+                    </div>
+                    <div class="column">
+                        <div class="column-icon">💸</div>
+                        <h3>Fear of Failure</h3>
+                        <p style="font-size: 0.7em;">Real-world mistakes are too expensive.</p>
+                    </div>
+                    <div class="column">
+                        <div class="column-icon">❓</div>
+                        <h3>Lack of Mentorship</h3>
+                        <p style="font-size: 0.7em;">No personalized guidance to follow.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Слайд 3: Решение -->
+            <section>
+                <h2>Our Solution:</h2>
+                <h1>A personal business coach <br><span class="accent">in your pocket.</span></h1>
+                <p style="margin-top: 30px;">
+                    UpNext is a mobile-first platform that turns business education into a game, guiding you from <strong>idea to first profit</strong>.
+                </p>
+            </section>
+
+            <!-- Слайд 4: Как это работает -->
+            <section>
+                <h2>From Zero to Launch in 4 Steps</h2>
+                <div class="columns" style="align-items: center; font-size: 0.8em; text-align: center; margin-top: 50px;">
+                    <div class="column" style="min-width: 150px;">🎯<br><strong>1. Set Goal</strong><br><small>Define skills & interests</small></div>
+                    <div style="font-size: 2em;">→</div>
+                    <div class="column" style="min-width: 150px;">🗺️<br><strong>2. Get Plan</strong><br><small>AI builds your roadmap</small></div>
+                    <div style="font-size: 2em;">→</div>
+                    <div class="column" style="min-width: 150px;">✅<br><strong>3. Complete Quests</strong><br><small>Learn by doing</small></div>
+                    <div style="font-size: 2em;">→</div>
+                    <div class="column" style="min-width: 150px;">🚀<br><strong>4. Launch MVP</strong><br><small>Get first customers</small></div>
+                </div>
+            </section>
+            
+            <!-- Слайд 5: Размер Рынка -->
+            <section>
+                <h2>A Massive & Growing Opportunity</h2>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 30px;">
+                    <div style="border: 2px solid #555; border-radius: 20px; padding: 15px 30px; text-align: center;">
+                        <p><strong>TAM: $350B+</strong><br><small>Global E-Learning Market</small></p>
+                    </div>
+                    <div style="border: 2px solid #888; border-radius: 20px; padding: 15px 30px; text-align: center;">
+                       <p><strong>SAM: $80B</strong><br><small>Online Business Education</small></p>
+                    </div>
+                    <div style="border: 2px solid var(--accent-color); background: rgba(49, 181, 114, 0.1); border-radius: 20px; padding: 15px 30px; text-align: center;">
+                           <p><strong class="accent">SOM: $100M+</strong><br><small>Our Initial Target Market</small></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Слайд 6: Бизнес-модель -->
+            <section>
+                <h2>Clear Path to Revenue: <span class="accent">Freemium</span></h2>
+                 <div class="columns" style="margin-top: 40px; align-items: stretch;">
+                    <div class="column" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
+                        <h3>FREE</h3>
+                        <p style="font-size: 0.7em;">Basic courses to attract a massive user base and demonstrate value.</p>
+                    </div>
+                    <div class="column" style="background: rgba(49, 181, 114, 0.2); padding: 20px; border-radius: 10px; border: 1px solid var(--accent-color);">
+                        <h3>PREMIUM</h3>
+                        <p style="font-size: 0.7em;"><strong>$15/month</strong> for the AI Mentor, advanced simulators, and document templates.</p>
+                    </div>
+                    <div class="column" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
+                        <h3>PARTNERSHIPS</h3>
+                        <p style="font-size: 0.7em;">Revenue share from essential startup tools (CRMs, website builders, etc.).</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Слайд 7: Конкуренция -->
+            <section>
+                 <h2>Why We Win</h2>
+                 <div class="competition-grid">
+                    <div class="grid-item"><strong>Business Coaches</strong><br><small>(Practical, but Expensive)</small></div>
+                    <div class="grid-item upnext"><strong>UpNext</strong><br><small>(Practical & Affordable)</small></div>
+                    <div class="grid-item"><strong>YouTube, Blogs</strong><br><small>(Affordable, but Theoretical)</small></div>
+                    <div class="grid-item"><strong>Udemy, Coursera</strong><br><small>(Affordable, but Theoretical)</small></div>
+                 </div>
+            </section>
+
+            <!-- Слайд 8: Команда -->
+            <section>
+                <h2>Our Team</h2>
+                <div style="text-align: center; margin-top: 40px;">
+                    <h3>Munar Sagymbay - Founder & CEO</h3>
+                    <p style="font-size: 0.8em;">5+ years in product management & strategy.<br>Launched and scaled 2 successful B2C apps.</p>
+                </div>
+                <div style="margin-top: 50px;">
+                    <h4>We are looking for a <span class="accent">Lead Developer / CTO</span> with AI/ML experience.</h4>
+                </div>
+            </section>
+
+            <!-- Слайд 9: Запрос -->
+            <section>
+                <h2>We are raising</h2>
+                <h1 class="accent" style="font-size: 4em; margin: 20px 0;">$250,000</h1>
+                <h3>For an 18-month runway to achieve:</h3>
+                <ul style="margin: 0 auto; width: 80%; max-width: 700px; text-align: left; font-size: 0.8em;">
+                    <li><strong>Product Development (60%):</strong> Hire a core team & Launch MVP</li>
+                    <li><strong>Marketing & Sales (25%):</strong> Acquire first 20,000 users</li>
+                    <li><strong>Operations (15%):</strong> Legal & administrative costs</li>
+                </ul>
+            </section>
+            
+            <!-- Слайд 10: Финальный -->
+            <section>
+                <h1>Thank You</h1>
+                <h3>Let's build the future of entrepreneurship together.</h3>
+                <div style="margin-top: 50px;">
+                    <p>
+                        Munar Sagymbay<br>
+                        <a href="mailto:munarkz123@gmail.com">munarkz123@gmail.com</a><br>
+                        <a href="https://ymsoo.github.io/menu" target="_blank">View Prototype</a>
+                    </p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            transition: 'slide',
+        });
+    </script>
+</body>
+</html>
