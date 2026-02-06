@@ -61,16 +61,25 @@
             height: 450px;
             margin: 20px auto;
         }
+        
+        /* ИЗМЕНЕНИЕ ЗДЕСЬ: Добавлено flex-direction: column */
         .grid-item {
             display: flex;
+            flex-direction: column; /* Выстраивает элементы вертикально */
             align-items: center;
             justify-content: center;
             padding: 20px;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.05);
-            font-size: 0.8em;
+            font-size: 1em;
             text-align: center;
         }
+        
+        .grid-item small {
+            margin-top: 10px; /* Небольшой отступ между заголовком и описанием */
+            display: block;
+        }
+
         .grid-item.upnext {
             background: var(--accent-color);
             color: #000;
@@ -137,39 +146,46 @@
                 </p>
             </section>
 
-            <!-- Слайд 5: Как это работает -->
+            <!-- Слайд 5: Как это работает (ИЗМЕНЕННЫЙ) -->
             <section>
                 <h2>From Zero to Launch in 4 Steps</h2>
-                <div class="columns" style="align-items: center; font-size: 0.8em; text-align: center; margin-top: 50px;">
-                    <div class="column" style="min-width: 150px;">🎯<br><strong>1. Set Goal</strong><br><small>Define skills & interests</small></div>
+                <!-- ИЗМЕНЕНИЕ ЗДЕСЬ: flex-wrap: nowrap и убраны большие min-width -->
+                <div class="columns" style="display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; text-align: center; margin-top: 50px; gap: 10px;">
+                    
+                    <div class="column" style="min-width: auto; flex: 1;">
+                        <span style="font-size: 2em;">🎯</span><br>
+                        <strong>1. Set Goal</strong><br>
+                        <small style="font-size: 0.6em;">Define skills</small>
+                    </div>
+                    
                     <div style="font-size: 2em;">→</div>
-                    <div class="column" style="min-width: 150px;">🗺️<br><strong>2. Get Plan</strong><br><small>AI builds your roadmap</small></div>
+                    
+                    <div class="column" style="min-width: auto; flex: 1;">
+                        <span style="font-size: 2em;">🗺️</span><br>
+                        <strong>2. Get Plan</strong><br>
+                        <small style="font-size: 0.6em;">AI roadmap</small>
+                    </div>
+                    
                     <div style="font-size: 2em;">→</div>
-                    <div class="column" style="min-width: 150px;">✅<br><strong>3. Complete Quests</strong><br><small>Learn by doing</small></div>
+                    
+                    <div class="column" style="min-width: auto; flex: 1;">
+                        <span style="font-size: 2em;">✅</span><br>
+                        <strong>3. Do Quests</strong><br>
+                        <small style="font-size: 0.6em;">Learn by doing</small>
+                    </div>
+                    
                     <div style="font-size: 2em;">→</div>
-                    <div class="column" style="min-width: 150px;">🚀<br><strong>4. Launch MVP</strong><br><small>Get first customers</small></div>
+                    
+                    <div class="column" style="min-width: auto; flex: 1;">
+                        <span style="font-size: 2em;">🚀</span><br>
+                        <strong>4. Launch</strong><br>
+                        <small style="font-size: 0.6em;">Get customers</small>
+                    </div>
+
                 </div>
             </section>
             
-            <!-- Слайд 6: Прогресс -->
-            <section>
-                <h2>Where We Are Today</h2>
-                <div style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 15px; margin-top: 40px;">
-                    <ul style="margin: 0 auto; text-align: left; width: 80%;">
-                        <li style="margin-bottom: 20px;">
-                            <strong class="accent">✅ Problem Validated:</strong> Conducted 25+ in-depth interviews confirming the core need for a practical, guided solution.
-                        </li>
-                        <li style="margin-bottom: 20px;">
-                            <strong class="accent">✅ Interactive Prototype:</strong> A full-featured, clickable prototype is developed in Figma, demonstrating the user flow and UI.
-                        </li>
-                        <li>
-                            <strong class="accent">➡️ Next Step:</strong> Secure funding to build and launch the MVP (Minimum Viable Product) within the next 6 months.
-                        </li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Слайд 7: Размер Рынка -->
+            <!-- Слайд 6: Размер Рынка -->
             <section>
                 <h2>A Massive & Growing Opportunity</h2>
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 30px;">
@@ -185,7 +201,7 @@
                 </div>
             </section>
 
-            <!-- Слайд 8: Бизнес-модель -->
+            <!-- Слайд 7: Бизнес-модель -->
             <section>
                 <h2>Clear Path to Revenue: <span class="accent">Freemium</span></h2>
                  <div class="columns" style="margin-top: 40px; align-items: stretch;">
@@ -204,25 +220,37 @@
                 </div>
             </section>
             
-            <!-- Слайд 9: Конкуренция -->
+            <!-- Слайд 8: Конкуренция (ИЗМЕНЕННЫЙ) -->
             <section>
                  <h2>Why We Win</h2>
                  <div class="competition-grid">
-                    <div class="grid-item"><strong>Business Coaches</strong><br><small>(Practical, but Expensive)</small></div>
-                    <div class="grid-item upnext"><strong>UpNext</strong><br><small>(Practical & Affordable)</small></div>
-                    <div class="grid-item"><strong>YouTube, Blogs</strong><br><small>(Affordable, but Theoretical)</small></div>
-                    <div class="grid-item"><strong>Udemy, Coursera</strong><br><small>(Affordable, but Theoretical)</small></div>
+                    <div class="grid-item">
+                        <strong>Business Coaches</strong>
+                        <small>(Practical, but Expensive)</small>
+                    </div>
+                    <div class="grid-item upnext">
+                        <strong>UpNext</strong>
+                        <small>(Practical & Affordable)</small>
+                    </div>
+                    <div class="grid-item">
+                        <strong>YouTube, Blogs</strong>
+                        <small>(Affordable, but Theoretical)</small>
+                    </div>
+                    <div class="grid-item">
+                        <strong>Udemy, Coursera</strong>
+                        <small>(Affordable, but Theoretical)</small>
+                    </div>
                  </div>
             </section>
 
-            <!-- Слайд 10: Команда и призыв к действию -->
+            <!-- Слайд 9: Команда и призыв к действию -->
             <section>
                 <h2>Join Our Mission</h2>
                 <div class="columns" style="margin-top: 40px;">
                     <div class="column">
                         <div class="column-icon">💻</div>
                         <h3>Technical Partners</h3>
-                        <p style="font-size: 0.7em;">We are looking for passionate developers and designers to help us build an impactful MVP.</p>
+                        <p style="font-size: 0.7em;">We are looking for passionate developers and designers to help us build an impactful product.</p>
                     </div>
                     <div class="column">
                         <div class="column-icon">💡</div>
@@ -230,10 +258,10 @@
                         <p style="font-size: 0.7em;">We need your expertise to help us shape the curriculum and mentorship experience.</p>
                     </div>
                 </div>
-                 <h4 style="margin-top: 50px;">Founder: Munar Sagymbay (5+ years in product management)</h4>
+                 <h4 style="margin-top: 50px;">Founder: Munar Sagymbay ( IB DP1 student )</h4>
             </section>
 
-            <!-- Слайд 11: Запрос -->
+            <!-- Слайд 10: Запрос -->
             <section>
                 <h2>We are raising</h2>
                 <h1 class="accent" style="font-size: 4em; margin: 20px 0;">$250,000</h1>
@@ -243,7 +271,7 @@
                 </p>
             </section>
             
-            <!-- Слайд 12: Финальный (ИЗМЕНЕННЫЙ) -->
+            <!-- Слайд 11: Финальный -->
             <section>
                 <h1>Thank You</h1>
                 <h3>Let's build the future of entrepreneurship together.</h3>
@@ -251,7 +279,7 @@
                     <p>
                         Munar Sagymbay<br>
                         <a href="mailto:munarkz123@gmail.com">munarkz123@gmail.com</a><br>
-                        <a href="[ссылка на прототип, если есть]">Link</a>
+                        <a href="#">Link</a>
                     </p>
                 </div>
             </section>
