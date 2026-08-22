@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAT Practice Tests (All Modules)</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f6f8;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        line-height: 1.6;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    h1 {
+        text-align: center;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+    }
+    
+    /* Стили для вкладок (Tabs) */
+    .tabs {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .tab-btn {
+        padding: 12px 24px;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        background: #e0e0e0;
+        color: #555;
+        border: none;
+        border-radius: 8px;
+        transition: 0.3s;
+    }
+    .tab-btn:hover {
+        background: #d0d0d0;
+    }
+    .tab-btn.active {
+        background: #005a9c;
+        color: #fff;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .info-note {
+        text-align: center;
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    .top-controls {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .question-card {
+        background: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+        border-top: 5px solid #005a9c;
+    }
+    .question-header {
+        font-weight: bold;
+        font-size: 1.2em;
+        margin-bottom: 15px;
+        color: #005a9c;
+    }
+    .text-content {
+        margin-bottom: 20px;
+        font-size: 1.05em;
+    }
+    .sub-question {
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    .choices {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .choice-label {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .choice-label:hover:not(.disabled) {
+        background-color: #f0f7ff;
+        border-color: #005a9c;
+    }
+    .choice-label input {
+        margin-top: 5px;
+        margin-right: 15px;
+        cursor: pointer;
+    }
+    .choice-letter {
+        font-weight: bold;
+        margin-right: 10px;
+        color: #555;
+    }
+    .btn {
+        background-color: #005a9c;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        font-size: 1em;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn:hover:not(:disabled) {
+        background-color: #00407a;
+    }
+    .btn-shuffle {
+        background-color: #28a745;
+        font-size: 1.1em;
+        padding: 12px 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-shuffle:hover {
+        background-color: #218838;
+    }
+    .btn:disabled {
+        background-color: #a0a0a0;
+        cursor: not-allowed;
+    }
+    .explanation {
+        display: none;
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-left: 4px solid #005a9c;
+        border-radius: 4px;
+        font-size: 0.95em;
+    }
+    .correct-choice {
+        background-color: #d4edda !important;
+        border-color: #28a745 !important;
+    }
+    .incorrect-choice {
+        background-color: #f8d7da !important;
+        border-color: #dc3545 !important;
+    }
+    .disabled {
+        pointer-events: none;
+    }
+    .error-msg {
+        color: #dc3545;
+        font-size: 0.9em;
+        margin-top: 10px;
+        display: none;
+    }
+    ul { margin-top: 0; padding-left: 20px; }
+    .data-box { background: #eee; padding: 15px; font-family: monospace; border-radius: 5px; margin-bottom: 15px; font-size: 0.9em;}
+    .data-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+    .data-table th, .data-table td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    .data-table th { background-color: #f0f0f0; }
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <h1>Практические тесты SAT</h1>
+    
+    <!-- Навигация по тестам -->
+    <div class="tabs">
+        <button class="tab-btn active" id="tab-test1" onclick="switchTab('test1')">Модуль 1 (Первый тест)</button>
+        <button class="tab-btn" id="tab-test2" onclick="switchTab('test2')">Модуль 2 (Второй тест)</button>
+        <button class="tab-btn" id="tab-test3" onclick="switchTab('test3')">August 2026 (Третий тест)</button>
+    </div>
+    <div class="info-note">Внимание: переключение между тестами сбрасывает текущий прогресс!</div>
+
+    <div class="top-controls">
+        <button class="btn btn-shuffle" onclick="shuffleQuestions()">🔀 Перемешать вопросы</button>
+    </div>
+    
+    <div id="test-container"></div>
+</div>
+
+<script>
+    // --- ДАННЫЕ ДЛЯ ТЕСТА 1 ---
+    const test1Data = [
+        { text: "Long dismissed by earlier art historians as derivative copies of metropolitan styles, the stone sculptures crafted in provincial Roman Gaul are now understood to possess a ________ aesthetic, combining Mediterranean carving techniques with indigenous Celtic motifs to create a distinctly regional visual idiom.", choices: ["conventional", "singular", "fleeting", "redundant"], answer: 1, explanation: "Слово «singular» означает исключительный или уникальный. Скульптуры сочетали в себе два разных стиля, создавая «отчетливо региональный визуальный язык», то есть нечто уникальное." },
+        { text: "Linguists studying the endangered Kusunda language of western Nepal noted that while its phonemic repertoire shares several phonetic features with surrounding Sino-Tibetan tongues, Kusunda's core lexicon and grammatical structure are entirely ________: the language possesses no demonstrable genealogical relationship to any other known language family.", choices: ["isolated", "rudimentary", "contentious", "redundant"], answer: 0, explanation: "В тексте сказано, что у языка нет «никакой доказуемой генеалогической связи с любой другой известной языковой семьей». В лингвистике такие языки называются изолированными («isolated»)." },
+        { text: "Although laboratory assays demonstrated that the newly synthesized peptide compound could rapidly destroy bacterial cell membranes in vitro, clinical microbiologists cautioned that the molecule's high cytotoxicity against mammalian kidney cells would likely ________ its therapeutic utility in human patients.", choices: ["preclude", "anticipate", "accentuate", "corroborate"], answer: 0, explanation: "Соединение эффективно против бактерий, *но* оно очень токсично для клеток почек человека. Эта токсичность будет препятствовать / делать невозможным («preclude») его терапевтическое использование на пациентах." },
+        { text: "A superficial survey of the architecture of the Mughal emperor Akbar's palace complex at Fatehpur Sikri might suggest a haphazard assembly of disparate regional structures, but closer spatial analysis reveals a remarkably ________ layout, deliberately aligning sandstone pavilions along precise cardinal axes to signify royal authority and balance.", choices: ["rudimentary", "precarious", "coherent", "superfluous"], answer: 2, explanation: "Слово «haphazard» (случайный, беспорядочный) противопоставляется слову «coherent» (согласованный, логичный). Более детальный анализ показывает, что планировка была точно выверенной и согласованной." },
+        { text: "Historian Linda Gordon explains that early twentieth-century social reformer Florence Kelley did not merely critique unsafe industrial labor conditions in abstract terms; rather, Kelley compiled ________ statistical records detailing exact factory temperatures, injury rates, and working hours to force state legislators to enact binding safety regulations.", choices: ["speculative", "exhaustive", "partisan", "antiquated"], answer: 1, explanation: "«Exhaustive» означает исчерпывающий, всесторонний. Келли не ограничилась абстрактной критикой, а собрала подробные и исчерпывающие статистические данные." },
+        { text: "The following text is adapted from George Eliot's 1871–1872 novel <i>Middlemarch</i>. Dorothea Brooke is contemplating the scholarly ambitions of her husband, Edward Casaubon.<br><br>Dorothea had believed that in marrying Mr. Casaubon she would be helping to construct a monumental edifice of knowledge that would illuminate ancient mythologies for all future ages. Yet <u>day by day, as she sorted through piles of disconnected notes and half-filled notebooks in the dim library, the great work began to look less like an enduring monument than an impenetrable labyrinth leading nowhere.</u> The massive synthesis remained unwritten, existing only in fragmentary outlines that seemed to multiply without advancing toward any definite conclusion.", question: "Which choice best states the function of the underlined sentence in the text as a whole?", choices: ["It emphasizes Dorothea's growing realization that Casaubon's intellectual project lacks true cohesion and progress.", "It illustrates Dorothea's frustration with her own inability to organize Casaubon's research notes.", "It reveals that Casaubon has deliberately concealed the true progress of his manuscript from Dorothea.", "It introduces a contrast between Casaubon's modest scholarly reputation and Dorothea's grand ambitions for him."], answer: 0, explanation: "Доротея понимает, что записи мужа — это разрозненный «лабиринт, ведущий в никуда» (проекту не хватает связности и прогресса)." },
+        { text: "The following text is adapted from Edith Wharton's 1920 novel <i>The Age of Innocence</i>. Newland Archer reflects on the rigid social conventions governing elite New York society.<br><br>In the subtle and elaborate hierarchy of old New York, an unalterable code regulated every gesture, from the precise date for exchanging summer calls to the exact shade of gloves permissible at an evening opera. It was a world where real feelings were never mentioned, and where the direct expression of an opinion was regarded as almost indecent. Newland Archer had been bred in this atmosphere of delicate evasions; he accepted its decrees unquestioningly, yet he occasionally felt a faint stir of restlessness, a sudden fleeting suspicion that this meticulous preservation of form was merely a collective conspiracy to avoid facing the reality of life.", question: "Which choice best states the main purpose of the text?", choices: ["It details the specific social rules that Newland Archer attempted to reform within his social circle.", "It explores Newland Archer's awareness of the tension between rigid social decorum and genuine emotional experience.", "It illustrates why Newland Archer decided to permanently withdraw from elite New York society.", "It contrasts Newland Archer's open emotional demeanor with the guarded behavior of his peers."], answer: 1, explanation: "Текст описывает жесткие социальные нормы, где запрещено проявлять настоящие чувства, и показывает внутренний конфликт Арчера между этими нормами и жаждой эмоций." },
+        { text: "In an investigation of spatial cognition, neuroscientist Edvard Moser and colleagues examined how mammals maintain internal maps of physical environments. The team recorded the electrical activity of specialized neurons—known as grid cells—in the medial entorhinal cortex of rodents navigating open enclosures. <u>The firing fields of individual grid cells formed remarkably regular, periodic triangular lattices spanning the entire available area, closely matching mathematical models of hexagonal close-packing.</u> This spatial periodicity indicated to the researchers that the entorhinal cortex generates an intrinsic, metric coordinate system capable of computing distance and trajectory independently of external visual landmarks.", question: "Which choice best states the function of the underlined sentence in the text as a whole?", choices: ["To offer empirical data describing the geometric firing pattern that supports the researchers' deduction about the brain's spatial mapping mechanism", "To present a surprising inconsistency in the neural recordings that prompted Moser and his team to revise their experimental setup", "To outline an alternative mathematical hypothesis that contradicts the researchers' view of entorhinal navigation", "To describe the specific laboratory environment constructed to test rodent navigational speed"], answer: 0, explanation: "В подчеркнутом предложении приводятся конкретные эмпирические данные о том, как именно формируются паттерны активности клеток. В следующем предложении говорится, что эти данные помогли сделать вывод." },
+        { text: "<b>Text 1</b><br>Urban preservation policies should prioritize the strict material restoration of historic buildings to their original architectural state. Altering historic structures to accommodate modern commercial enterprises compromises their authentic character and severs the tangible link between a community and its architectural heritage.<br><br><b>Text 2</b><br>Urban theorist Jane Jacobs argued that cities need old buildings to cultivate vibrant, diverse economic activity, but preserving structures purely as frozen museum pieces is unsustainable. When historic buildings undergo adaptive reuse—repurposing industrial warehouses or nineteenth-century storefronts into housing or local businesses—they remain active contributors to neighborhood life...", question: "Based on the texts, how would the author of Text 2 most likely respond to the preservation approach advocated in Text 1?", choices: ["By agreeing that modifying original interior layouts always leads to severe economic decline in historic districts", "By suggesting that preserving original structures without permitting functional updates can prevent historic buildings from serving vital community and economic roles", "By demonstrating that historic buildings require identical structural maintenance regardless of whether they are preserved as museums or reused", "By contending that new construction projects generate lower carbon emissions than the structural retrofitting of existing buildings"], answer: 1, explanation: "Автор первого текста требует строгой исторической консервации. Автор второго текста ответила бы, что замораживать здания как музеи — нежизнеспособно, и им нужно функциональное обновление для поддержания экономики." },
+        { text: "Sociologist Matthew Salganik and colleagues conducted an experimental study to examine how social influence affects cultural markets. The researchers created an artificial online music platform where over 14,000 participants could listen to, rate, and download 48 previously unknown songs... Salganik and his team observed that when download counts were visible, popular songs became dramatically more popular while unpopular songs languished, demonstrating that social influence amplifies inequality in market success...", question: "Based on the text, what did Salganik and colleagues determine about cultural markets where consumers can observe other consumers' choices?", choices: ["Consumer evaluations become more accurate indicators of a product's objective artistic value.", "Market inequality decreases as obscure works receive greater collective visibility.", "Past consumer choices heavily bias subsequent consumer behavior, increasing the disparity between top-performing and low-performing items.", "Consumers actively seek out less popular products to establish distinctive personal tastes."], answer: 2, explanation: "Исследование показало, что выбор прошлых потребителей сильно искажает выбор будущих, увеличивая разрыв между хитами и аутсайдерами." },
+        { text: "<div class='data-box'>[График: Nitrogen Fixation Rate]<br>- Low (5 mg/kg): около 15<br>- Moderate (20 mg/kg): около 42<br>- High (50 mg/kg): более 60</div>Leguminous plants establish symbiotic relationships with soil bacteria... Plant ecologist Dr. Elena Vasquez measured nitrogen fixation rates in soybean plants cultivated under three distinct soil phosphorus concentrations... Vasquez concluded that biological nitrogen fixation scales directly with increasing phosphorus availability.", question: "Which choice best describes data from the graph that support Dr. Vasquez's conclusion?", choices: ["Soybean plants grown in moderate phosphorus soil exhibited nitrogen fixation rates approximately twice as high as those grown in high phosphorus soil.", "The nitrogen fixation rate increased from approximately 15 μmol N2/plant/h under low phosphorus conditions to over 60 μmol N2/plant/h under high phosphorus conditions.", "Plants grown in low phosphorus soil achieved higher nitrogen fixation rates than plants cultivated in moderate phosphorus soil.", "The nitrogen fixation rate remained essentially constant across all three tested phosphorus concentrations."], answer: 1, explanation: "График четко показывает: при низком содержании фосфора фиксация азота составляет около 15, а при высоком — более 60." },
+        { text: "<div class='data-box'>[Таблица: Аномалии ширины годовых колец]<br>Вулкан | Year +1 | Year +2 | Year +3<br>Kuwae | -0.42 | -0.68 | -0.25<br>Huaynaputina | -0.81 | -0.54 | -0.18<br>Tambora | -0.95 | -0.72 | -0.31<br>Krakatoa | -0.36 | -0.22 | +0.04</div>The researchers observed that while the severity of growth reduction varied across events, ________", question: "Which choice most effectively uses data from the table to complete the statement?", choices: ["every recorded eruption resulted in positive tree-ring width anomalies by the second year following the eruption.", "the largest single-year growth suppression across all four events occurred in the third year following the 1815 Tambora eruption.", "growth suppression was sustained across all three post-eruption years for the Kuwae, Huaynaputina, and Tambora events, whereas ring widths after the Krakatoa eruption recovered to positive anomalies by Year +3.", "the Huaynaputina eruption caused greater ring width suppression in Year +2 than in Year +1."], answer: 2, explanation: "В колонке «Year +3» у вулканов Kuwae, Huaynaputina и Tambora значения отрицательные, а у Кракатау значение стало положительным (+0.04)." },
+        { text: "In 1926, young African American writers published the avant-garde literary journal <i>Fire!!</i>. Literary historian Henry Louis Gates Jr. argues that the journal represented an intentional rebellion against the older generation of Harlem Renaissance leaders, who advocated that Black art should primarily serve as respectable propaganda to demonstrate civic merit to white society.", question: "Which quotation from an essay by Wallace Thurman in Fire!! would most directly illustrate the literary historian's argument?", choices: ["\"We are interested in artistic self-expression for its own sake, utterly indifferent to whether our depictions of Black life appease the moral standards of white critics or the social respectability demanded by older Negro leaders.\"", "\"The primary purpose of our quarterly is to provide a comprehensive historical record of African American achievements in poetry and painting since the late nineteenth century.\"", "\"By presenting meticulously edited works of drama and verse, our publication hopes to gain widespread financial patronage from major philanthropic foundations.\"", "\"Our contributors share a profound reverence for the aesthetic principles and cultural institutions established by our distinguished elders over the preceding decades.\""], answer: 0, explanation: "Цитата А идеально отражает бунт: авторам безразличны «моральные стандарты белых критиков и социальная респектабельность, требуемая старшими»." },
+        { text: "African elephants communicate using low-frequency acoustic vocalizations known as \"rumbles.\" ... McComb discovered that acoustic recognition of specific herd members degrades significantly at distances exceeding 1.5 kilometers, because higher-frequency vocal tract resonances (formants) around 115 Hz attenuate and become obscured by ambient environmental noise. McComb therefore concluded that ________", choices: ["infrasonic frequencies below 20 Hz are solely responsible for coding the individual social identity of calling elephants.", "long-distance social recognition in elephants depends on specific acoustic formant frequencies whose effective transmission range is narrower than the overall audible range of elephant infrasound.", "ambient environmental noise enhances the propagation speed of low-frequency elephant contact rumbles across open savannah landscapes.", "female African elephants cannot differentiate between the vocal calls of family members and unfamiliar elephants at any distance."], answer: 1, explanation: "Способность узнавать друг друга работает на дистанции, которая намного короче (narrower), чем общая дальность слышимости инфразвука." },
+        { text: "Data from NASA's Cassini spacecraft revealed that Saturn's icy moon Enceladus expels active plumes of water vapor... planetary scientists remained uncertain whether the ocean contained soluble phosphorus... In a 2023 study, geochemist Frank Postberg and colleagues analyzed high-resolution spectra and identified abundant sodium phosphate salts. Because phosphorus concentrations were calculated to be at least 100 times higher than those in Earth's oceans, the researchers suggest that ________", choices: ["the presence of phosphorus on Enceladus indicates that all life-detection criteria for its ocean have now been definitively satisfied.", "high concentrations of dissolved phosphorus in Enceladus's ocean eliminate one of the major suspected geochemical constraints on the habitability of that environment.", "the ice grains detected in Enceladus's plumes originated from surface impacts rather than hydrothermal interactions with the moon's rocky core.", "Enceladus lacks the thermodynamic energy sources required to sustain biological chemical reactions."], answer: 1, explanation: "Новые данные о наличии фосфора устраняют геохимическое ограничение (constraint) для возможной обитаемости океана." },
+        { text: "In 1811, twelve-year-old Mary Anning discovered the fossilized skull of an Ichthyosaurus along the cliffs of Lyme Regis in Dorset, England. Over the next three decades, she ________ numerous significant marine reptile specimens that transformed the emerging scientific field of paleontology...", choices: ["will unearth", "unearthed", "is unearthing", "unearths"], answer: 1, explanation: "Действие происходило в начале 19 века. Это законченное действие в прошлом — «unearthed» (раскопала)." },
+        { text: "Archaeological investigations of ancient Maya wetland agriculture in Belize have revealed extensive networks of modified drainage canals. These complex raised-field systems, constructed by excavating channels through flood-prone bajos to create elevated planting platforms, ________ substantial agricultural surplus during periods of severe population density.", choices: ["provided", "providing", "to provide", "having provided"], answer: 0, explanation: "Предложение нуждается в главном сказуемом для подлежащего. «Provided» — единственный личный глагол, который делает предложение грамматически полным." },
+        { text: "Employing high-precision laser altimetry to map the dense canopy of the Guatemalan jungle, ________ hundreds of previously unrecorded structures, including fortified hilltop defenses, interconnected causeways, and domestic residential terraces.", choices: ["the Pacunam LiDAR initiative revealed", "previously unrecorded structures were discovered by researchers with", "the discovery of fortifications was made by archaeologists in", "domestic terraces and causeways were documented through"], answer: 0, explanation: "Фраза до запятой описывает того, кто выполнял действие. Применять лазер могли только люди или группа, поэтому сразу после запятой должно идти подлежащее — «the Pacunam LiDAR initiative»." },
+        { text: "When conducting remote sensing surveys of ancient architectural complexes, archaeological teams must evaluate spatial patterns in multispectral imagery before deciding which excavation trench ________", choices: ["should they open?", "they should open.", "should they open.", "they should open?"], answer: 1, explanation: "Здесь используется косвенный вопрос. Порядок слов прямой, а так как главное предложение повествовательное, в конце ставится точка." },
+        { text: "The 1913 Armory Show in New York City introduced American audiences to European modernism—including radical works by Marcel Duchamp, Henri Matisse, and Pablo ________ forever altering the trajectory of American twentieth-century art.", choices: ["Picasso;", "Picasso—", "Picasso:", "Picasso,"], answer: 1, explanation: "Пояснительная вставка в начале выделена тире. Чтобы закрыть эту вставку, нужно использовать второе тире." },
+        { text: "In materials science, perovskite solar cells have gained considerable attention for their remarkable power-conversion ________ unlike traditional silicon photovoltaic panels that require high-temperature manufacturing, perovskite crystals can be processed from inexpensive chemical solutions at relatively low temperatures.", choices: ["efficiency", "efficiency,", "efficiency;", "efficiency, but"], answer: 2, explanation: "В тексте два независимых предложения. Два таких полных предложения необходимо разделять точкой или точкой с запятой." },
+        { text: "Geothermal power plants utilize steam extracted from subterranean reservoirs to turn turbine generators and produce electricity. In Iceland, volcanic geology provides an exceptionally shallow geothermal resource, allowing geothermal energy to supply over 65% of the country's primary energy needs. ________ in regions lacking active tectonic boundaries, drilling deep enough to access equivalent subterranean heat is often economically prohibitive.", choices: ["In contrast,", "For instance,", "As a result,", "Furthermore,"], answer: 0, explanation: "В первом предложении говорится об Исландии (бурить дешево). Во втором — о других регионах (бурить невыгодно). Это прямое противопоставление — «In contrast,»." },
+        { text: "Tardigrades are microscopic invertebrates celebrated for their ability to survive lethal extremes of temperature, radiation, and dehydration by entering a dormant state known as anhydrobiosis. In this desiccation-tolerant state, the animals suspend all metabolic processes and synthesize specialized disordered proteins to protect cellular membranes. When rehydrated, ________ tardigrades resume active cellular respiration and locomotion within several hours.", choices: ["therefore,", "nevertheless,", "indeed,", "conversely,"], answer: 3, explanation: "При высыхании процессы приостанавливаются. При добавлении воды они возобновляются. Слово «conversely» (напротив / наоборот) подчеркивает этот обратный эффект." },
+        { text: "Engineers often look to biological adaptations in the natural world to resolve complex aerodynamic challenges. ________ when Japanese rail designers redesigned the high-speed Shinkansen 500-Series train to eliminate loud atmospheric sonic booms when exiting tunnels, they modeled the locomotive's elongated nose cone directly after the beak of the kingfisher.", choices: ["Specifically,", "Rather,", "Meanwhile,", "In comparison,"], answer: 0, explanation: "Второе предложение приводит конкретный пример (дизайн поезда). Переход «Specifically» (А именно / В частности) логично вводит этот пример." },
+        { text: "While researching a topic, a student has taken notes on the Voyager missions:<br>- In 1977, NASA launched the twin probes Voyager 1 and Voyager 2.<br>- In 2012, Voyager 1 crossed the heliopause and entered interstellar space.<br>- In 2018, Voyager 2 also crossed into interstellar space.", question: "The student wants to provide a chronological overview of the Voyager mission's primary exploration milestones. Which choice most effectively uses relevant information?", choices: ["Launched in 1977 to explore the outer planets, the Voyager probes completed flybys of Jupiter and Saturn before crossing the heliopause into interstellar space in 2012 and 2018.", "NASA took advantage of a rare planetary alignment in 1977 when launching the Voyager spacecraft to study Jupiter and Saturn.", "Although Voyager 2 made historic flybys of Uranus and Neptune in the 1980s, both probes now use the Deep Space Network to send data.", "Voyager 1 became the first human-made object to reach interstellar space when it crossed the heliopause in 2012."], answer: 0, explanation: "Вариант А — единственный, который выстраивает события в четкую временную (хронологическую) линию: 1977, затем 2012 и 2018." },
+        { text: "While researching a topic, a student has taken notes on Japanese painting styles:<br>- Yamato-e painting emphasizes flat areas of opaque color.<br>- Suibokuga focuses on monochromatic black sumi ink washes.", question: "The student wants to emphasize a difference between the aesthetic characteristics of yamato-e and suibokuga. Which choice most effectively uses relevant information?", choices: ["While yamato-e was developed in Japan to depict classical court literature, artists of the later Rinpa school synthesized multiple styles.", "Yamato-e is characterized by flat, opaque colors depicting native narrative subjects, whereas suibokuga relies on monochromatic black ink washes inspired by Zen philosophy.", "Both yamato-e and suibokuga are celebrated Japanese painting genres that flourished during historical imperial eras.", "Monochromatic black sumi ink is used in suibokuga, which was introduced to Japan during the Muromachi period between 1336 and 1573."], answer: 1, explanation: "Вариант B прямо сравнивает визуальные (эстетические) черты: плотные непрозрачные цвета против монохромных черных разводов." },
+        { text: "While researching a topic, a student has taken notes on physicist Lise Meitner:<br>- In 1938, forced to flee Nazi Germany, Meitner relocated to Sweden.<br>- Working in Sweden, she provided the first theoretical explanation for nuclear fission in 1939 based on Otto Hahn's observations.", question: "The student wants to contextualize Lise Meitner's theoretical breakthrough in nuclear fission. Which choice most effectively uses relevant information?", choices: ["Although Otto Hahn observed barium during neutron experiments in 1938, he won the 1944 Nobel Prize in Chemistry for the discovery of nuclear fission.", "After collaborating with Otto Hahn in Berlin for three decades, physicist Lise Meitner was forced to flee Germany for Sweden in 1938.", "While in exile in Sweden in 1939, Meitner provided the crucial theoretical explanation and energy calculations for the unexplained nuclear fission observations reported by Hahn.", "Lise Meitner and her nephew Otto Frisch conducted research in Stockholm, Sweden, after Meitner left Berlin in 1938."], answer: 2, explanation: "Вариант C предоставляет весь контекст: она находилась в изгнании в Швеции, когда предоставила важнейшее теоретическое обоснование непонятным результатам опытов Отто Гана." }
+    ];
+
+    // --- ДАННЫЕ ДЛЯ ТЕСТА 2 ---
+    const test2Data = [
+        { text: "While the archival findings of historian Evelyn Vance were initially celebrated for their apparent thoroughness, subsequent historiographical analysis revealed that her evidentiary framework was entirely ________: Vance had selectively incorporated only those administrative correspondences that corroborated her thesis while systematically omitting dozens of contradictory municipal reports.", choices: ["tendentious", "pellucid", "inchoate", "ubiquitous"], answer: 0, explanation: "«Tendentious» означает предвзятый. Историк выбирала только те документы, которые подтверждали её теорию, что делает её работу предвзятой." },
+        { text: "The philosophical treatises of the fourth-century logician were long considered hopelessly ________, dense with self-referential neologisms and obscure dialectical detours that resisted standard methods of exegesis. Recent scholarship, however, has demonstrated that these stylistic eccentricities were deliberate mnemonic devices designed for initiated students.", choices: ["lucid", "inscrutable", "perfunctory", "ephemeral"], answer: 1, explanation: "Слово «inscrutable» означает непостижимый, загадочный. Трактаты были «безнадежно непостижимыми»." },
+        { text: "Biochemists developing synthetic enzymes must overcome the phenomenon of catalytic promiscuity; an artificial catalyst that binds indiscriminately to non-target substrates will inevitably ________ the precise molecular pathways necessary for metabolic equilibrium.", choices: ["vitiate", "forestall", "substantiate", "buttress"], answer: 0, explanation: "«Vitiate» означает портить, искажать или сводить на нет. Искусственный фермент, который связывается со всем подряд, неизбежно нарушит молекулярные пути." },
+        { text: "In her critical assessment of late-nineteenth-century realist fiction, scholar Mireille Haddon argues that authors of the period did not view photographic verisimilitude as an end in itself; rather, they regarded the exhaustive enumeration of domestic objects as a ________ tool intended to reveal the invisible socio-economic pressures governing everyday domestic life.", choices: ["superfluous", "hermetic", "heuristic", "dogmatic"], answer: 2, explanation: "«Heuristic» означает эвристический, служащий для познания. Авторы использовали детализированные описания как инструмент для выявления скрытого давления." },
+        { text: "The following text is adapted from Virginia Woolf's 1927 novel <i>To the Lighthouse</i>.<br><br>She could see it all so clearly, so distinctly, when she was not hurried; the color was there, the balance was there, and the mass was right. <u>Yet the moment she took her brush and approached the canvas, a terrible levelling force intervened, reducing the luminous clarity of the inner vision to an awkward and unresponsive array of pigment and line.</u>", question: "Which choice best states the function of the underlined sentence in the text as a whole?", choices: ["It dramatizes the sudden emergence of external interruptions that divert the painter's attention.", "It illustrates the acute conflict the artist experiences when translating an idealized mental conception into a physical medium.", "It signifies Lily's decision to abandon her modernist artistic style in favor of conventional realism.", "It underscores the critical opinions of onlookers who disparage the technical execution of Lily's work."], answer: 1, explanation: "Подчеркнутое предложение идеально иллюстрирует конфликт между идеальным замыслом (в уме) и его физическим воплощением на холсте." },
+        { text: "The following text is from Henry James's 1902 novel <i>The Wings of the Dove</i>. Densher is observing Kate Croy in an aristocratic drawing room.<br><br>...Densher felt, as he watched her effortless negotiation of social subtleties, that her brilliance was not a spontaneous effervescence of spirit, but the cold calculation of an intelligence that never for an instant relaxed its vigilance. She gave nothing away that was not intended as a purchase; her smiles were currency, and her silences were fortified positions.", question: "Based on the text, which choice best characterizes Densher's perception of Kate Croy?", choices: ["He views her apparent social grace as an instinctive and guileless expression of natural charm.", "He regards her aristocratic demeanor as an insecure attempt to mask her unfamiliarity with high society.", "He perceives her polished social conduct as an instrumental, calculated strategy designed to achieve specific objectives.", "He believes her reserved demeanor isolates her from potential allies within their social circle."], answer: 2, explanation: "Деншер видит, что её блеск — это «не спонтанное проявление духа, а холодный расчет», то есть инструментальная стратегия." },
+        { text: "In evolutionary developmental biology, the concept of genetic assimilation describes a process by which an environmentally induced phenotype becomes fixed as an inherited trait through natural selection. <u>By selectively breeding the individuals that exhibited this response over several generations, Waddington produced a line of flies that consistently developed crossveinless wings even in the complete absence of temperature stress.</u>", question: "Which choice best states the function of the underlined sentence in the text as a whole?", choices: ["It details the specific experimental procedure and outcome that substantiated Waddington's theoretical claim.", "It challenges earlier evolutionary models that attributed morphological changes entirely to environmental stressors.", "It illustrates why fruit flies are inadequate model organisms for studying genetic assimilation in vertebrate populations.", "It highlights an unforeseen experimental failure that forced Waddington to reconsider his hypothesis."], answer: 0, explanation: "Подчеркнутое предложение описывает сам эксперимент и его конкретный результат, что подтверждает его теорию." },
+        { text: "<b>Text 1</b><br>Traditional economic welfare models rely heavily on gross domestic product (GDP) per capita as a proxy for social progress. These metrics operate on the assumption that material abundance and utility maximization accurately reflect societal flourishing.<br><br><b>Text 2</b><br>Economist Amartya Sen argues that evaluating human development purely through monetary income conflates the instruments of well-being with well-being itself. Under Sen's \"capabilities approach,\" societal progress must be evaluated based on people's substantive freedoms to achieve valuable functionings...", question: "Based on the texts, how would Amartya Sen (Text 2) most likely evaluate the core assumption of the traditional welfare models described in Text 1?", choices: ["By asserting that market transactions are too unstable to be accurately measured by national statistical agencies", "By arguing that aggregating financial wealth fails to account for whether individuals possess the actual substantive opportunities to lead fulfilling lives", "By contending that maximizing personal utility is impossible in economies with high inflation rates", "By suggesting that GDP per capita is useful only when applied to agrarian, pre-industrial societies"], answer: 1, explanation: "Сен возражает традиционным моделям, утверждая, что одних только денег недостаточно, если они не дают людям реальных возможностей для полноценной жизни." },
+        { text: "Epigenetic mechanisms modulate gene expression without altering the underlying DNA nucleotide sequence... recent genomic mapping in mammalian neurons reveals that DNA methylation within gene bodies (intragenic regions), rather than at promoter regions, frequently correlates with elevated transcriptional activity. Neurogeneticist Dr. Aris Thorne notes that this intragenic methylation prevents aberrant transcription initiation from cryptic internal sites...", question: "Which choice best states the primary purpose of the text?", choices: ["To dispute the long-held scientific consensus that epigenetic modifications play any functional role in cellular differentiation", "To explain how intragenic DNA methylation serves an unexpectedly facilitative role in transcriptional fidelity within neurons", "To contrast the metabolic efficiency of neuronal transcription machinery with that of non-neuronal somatic cells", "To propose a new therapeutic intervention for genetic disorders caused by promoter region hypermethylation"], answer: 1, explanation: "Текст объясняет, как внутри генов нейронов метилирование играет неожиданно поддерживающую роль (facilitative role) — предотвращает ошибки и сохраняет точность." },
+        { text: "In his <i>Philosophical Investigations</i>, Ludwig Wittgenstein introduced the \"private language argument,\" challenging the Cartesian assumption that language gains its meaning from internal, subjective mental sensations. Wittgenstein posited that for an individual to follow a rule regarding the naming of a private sensation, there must be a criterion for distinguishing between actually following the rule and merely believing one is following it. Because a solitary speaker isolated from a community of language users possesses no independent standard of correctness, the notion of a purely private language is inherently self-undermining...", question: "Which choice best states the main idea of the text?", choices: ["Language can communicate private subjective experiences only if an individual constructs a systematic internal dictionary.", "Linguistic meaning cannot exist in isolation because the validation of rule-following requires public, communal practices.", "Cartesian epistemology provides the most logically robust framework for explaining linguistic acquisition in early childhood.", "Mental sensations are too ephemeral and subjective to be categorized by conventional vocabulary."], answer: 1, explanation: "Основная идея: «частного языка» не существует. Для любого правила нужен внешний критерий, поэтому языковое значение основано на общественных практиках." },
+        { text: "<div class='data-box'>[График: Выбросы метана]<br>- Intact mineral permafrost soil (пунктир): остается ниже 20.<br>- Thermokarst bog soil (сплошная линия): резко растет до более 90 при 20°C.</div>Dr. Ksenia Romanova investigated the temperature sensitivity of methanogenic archaea by incubating two soil types... Romanova hypothesized that anoxic thermokarst soils possess active microbial consortia capable of exhibiting ________", question: "Which choice best describes data from the graph that support Dr. Romanova's hypothesis?", choices: ["Methane emissions in intact mineral permafrost soil remained below 20 mg CH4/m2/day across all temperatures, whereas emissions from thermokarst bog soil increased sharply to over 90 mg CH4/m2/day at 20°C.", "Thermokarst bog soil produced lower methane flux than intact permafrost soil at temperatures below 10°C.", "Both soil types exhibited linear decreases in methane production as the incubation temperature approached 20°C.", "Intact mineral permafrost soil showed an increase in methane flux that exceeded the flux of thermokarst bog soil at 15°C."], answer: 0, explanation: "График показывает, что выделение метана в нетронутой почве остается низким, тогда как в почве термокарста выбросы резко возрастают до более 90." },
+        { text: "In her foundational 1892 treatise <i>A Voice from the South</i>, educator and theorist Anna Julia Cooper articulated a framework that modern scholars recognize as an early formulation of intersectionality. Cooper argued that Black women occupied a distinct structural position in American society that could not be adequately addressed by civil rights organizations focused exclusively on Black men or by suffrage movements led predominantly by white women.", question: "Which quotation from A Voice from the South most directly illustrates Cooper's intersectional argument?", choices: ["\"The colored woman of to-day occupies a unique position in this country... She is confronted by both a woman question and a race question, and is as yet an unacknowledged factor in both.\"", "\"True progress must be measured by the educational advancement and moral elevation of the humblest classes in our communities.\"", "\"No woman can truly understand the duties of higher citizenship without a thorough grounding in classical literature and philosophy.\"", "\"Our institutions of higher learning must open their doors freely to all who exhibit the intellectual capacity to master advanced scientific disciplines.\""], answer: 0, explanation: "Цитата А идеально отражает интерсекциональность: «цветная женщина... сталкивается одновременно и с женским вопросом, и с расовым вопросом»." },
+        { text: "When searching for atmospheric biosignatures on exoplanets, astrobiologists prioritize chemical disequilibria—the simultaneous presence of gases that would rapidly react and destroy each other unless continuously replenished by biological activity... However, planetary modeler Dr. Kevin Zahnle cautions that finding atmospheric methane alone, in the absence of abundant oxygen or ozone, cannot serve as a reliable biosignature because ________", choices: ["abiotic processes, such as serpentinization and volcanic outgassing, can sustain high methane levels on lifeless rocky worlds.", "oxygen and methane cannot coexist in any planetary atmosphere regardless of biological activity.", "microbial methanogens on Earth do not release methane into the atmosphere in measurable quantities.", "ultraviolet radiation from stars accelerates biological photosynthesis while suppressing abiotic geologic emissions."], answer: 0, explanation: "Метан сам по себе не является биомаркером, потому что абиотические (небиологические) процессы могут поддерживать высокий уровень метана на безжизненных планетах." },
+        { text: "Phylogenomic analyses of the Asgard archaea have transformed evolutionary models of eukaryogenesis (the emergence of complex eukaryotic cells)... Evolutionary biologist Dr. Thijs Ettema argues that these genomic discoveries support the \"two-domain\" tree of life, in which eukaryotes did not branch off as an independent third lineage alongside Archaea and Bacteria, but rather ________", choices: ["evolved from an ancient bacterium that lacked any cytoskeletal or membrane-trafficking proteins.", "originated directly from within the archaeal domain through an endosymbiotic merger between an Asgard-related archaeon and an alphaproteobacterium.", "represent the ancestral lineage from which all primitive archaeal and bacterial clades subsequently descended.", "developed their eukaryotic signature proteins through entirely abiotic geochemical reactions occurring in hydrothermal vents."], answer: 1, explanation: "Согласно «двухдоменной» модели, эукариоты возникли напрямую изнутри домена архей через симбиоз." },
+        { text: "Economist George Akerlof demonstrated that in markets characterized by asymmetric information—where sellers know the true quality of a good but buyers cannot independently verify it prior to purchase—adverse selection can cause market unraveling... Akerlof concluded that without external signaling mechanisms, such as third-party certifications or binding warranties, ________", choices: ["market equilibrium will naturally stabilize at a price that satisfies both buyers and sellers of premium goods.", "asymmetric information will exclusively harm sellers of low-quality products while benefiting premium retailers.", "the market may degrade until only substandard goods are traded, or collapse entirely despite mutual gains from trade.", "buyers will eventually obtain complete technical knowledge of all products through repeat purchases."], answer: 2, explanation: "Без сертификаций рынок будет продолжать деградировать (degrade), пока не останутся только некачественные товары, или же рынок рухнет совсем." },
+        { text: "Neither the initial geochemical surveys conducted along the volcanic rift zone nor the subsequently compiled sediment core data ________ sufficient evidence to substantiate the hypothesis that hydrothermal vents operated continuously during the late Pleistocene epoch.", choices: ["provides", "have provided", "is providing", "has provided"], answer: 1, explanation: "Конструкция «Neither A nor B» требует согласования с ближайшим подлежащим (B). Слово «data» на SAT считается множественным числом. Поэтому нужен глагол «have provided»." },
+        { text: "By extracting and sequencing ancient environmental DNA preserved within Greenland's Kap København Formation, ________ a two-million-year-old subarctic ecosystem inhabited by mastodons, poplar trees, and Atlantic horseshoe crabs.", choices: ["a detailed reconstruction of biodiversity was achieved by paleogeneticist Eske Willerslev and his research team, revealing", "paleogeneticist Eske Willerslev and his research team reconstructed", "the discovery of two-million-year-old biodiversity was made possible when researchers reconstructed", "it was possible for paleogeneticist Eske Willerslev and his research team to reconstruct"], answer: 1, explanation: "Действие «извлекая и секвенируя» могли совершать только люди. Поэтому сразу после запятой должно стоять подлежащее-исполнитель — «paleogeneticist...»." },
+        { text: "Biochemist Jennifer Doudna, along with her French collaborator Emmanuelle ________ the CRISPR-Cas9 microbial adaptive immune system into a programmable genome-editing technology that revolutionized biomedical science.", choices: ["Charpentier, adapted", "Charpentier adapted", "Charpentier; adapted", "Charpentier—adapted"], answer: 0, explanation: "Фраза «along with her French collaborator...» является пояснительной и выделяется запятыми. Поскольку она начинается с запятой после Doudna, она должна закрываться запятой перед глаголом «adapted»." },
+        { text: "In high-pressure physics, metallic hydrogen remains one of the most elusive condensed-matter phases ________ theorists predict that at pressures exceeding 400 gigapascals, molecular hydrogen will dissociate into a dense lattice of atomic nuclei exhibiting room-temperature superconductivity.", choices: ["sought, however,", "sought; however,", "sought:", "sought"], answer: 2, explanation: "Двоеточие (:) связывает два независимых предложения, где второе объясняет или раскрывает первое." },
+        { text: "The conservation task force prioritized restoring three highly degraded wetland habitats: the salt marshes of the lower estuary, which buffer inland communities against storm ________ the inland freshwater peat bogs, which sequester vast amounts of organic carbon; and the coastal mangrove swamps, which provide nursery grounds for marine fish.", choices: ["surges;", "surges,", "surges", "surges—"], answer: 0, explanation: "Это список из трех элементов, каждый из которых содержит запятую внутри себя. Для их разделения между собой используется точка с запятой (;)." },
+        { text: "During the fourteenth century, the West African empire of Mali established itself as a global epicenter of commerce... Through ________ strategic administration of trans-Saharan trade routes in gold and salt, the imperial capital at Niani achieved unprecedented wealth.", choices: ["it's", "their", "its", "they're"], answer: 2, explanation: "Местоимение должно заменять «empire of Mali» (единственное число). Притяжательное местоимение для объектов в ед. числе — «its» (без апострофа)." },
+        { text: "Early neurobiologists theorized that the adult mammalian central nervous system was entirely post-mitotic and incapable of generating new functional neurons. ________ in the late 1990s, researchers utilizing bromodeoxyuridine (BrdU) pulse-chase labeling demonstrated active adult neurogenesis within the subgranular zone of the human dentate gyrus.", choices: ["Consequently,", "However,", "Furthermore,", "In other words,"], answer: 1, explanation: "В первом предложении говорится о теории, что мозг взрослых неспособен создавать нейроны. Во втором исследователи доказали обратное. Переход для противопоставления — «However,»." },
+        { text: "Standard silicon solar cells are physically constrained by the Shockley-Queisser limit, which caps the maximum theoretical energy conversion efficiency of a single p-n junction at approximately 33%. ________ to bypass this thermodynamic constraint, photovoltaic engineers are fabricating tandem multi-junction cells that stack semiconductor layers...", choices: ["Specifically,", "In contrast,", "Thus,", "Nonetheless,"], answer: 2, explanation: "Описана проблема (ограничение в 33%) и решение инженеров. Переход «Thus,» (Следовательно,) показывает причинно-следственную связь." },
+        { text: "While researching a topic, a student has taken notes on dendrochronology (tree-ring dating):<br>- Dendrochronological calibration revealed that raw radiocarbon dating systematically underestimated archaeological ages due to past fluctuations in atmospheric carbon-14 concentrations.", question: "The student wants to explain how dendrochronology improved the precision of radiocarbon dating. Which choice most effectively uses relevant information?", choices: ["By providing continuous multi-millennial tree-ring sequences, dendrochronology enabled researchers to calibrate radiocarbon dates and correct for historical fluctuations in atmospheric 14C levels.", "Bristlecone pines in California can live for over 4,800 years, making them among the oldest living individual organisms on Earth.", "Radiocarbon dating systematically underestimated the ages of ancient archaeological artifacts found in Ireland and Germany.", "Tree-ring sequences from bog oaks and bristlecone pines have allowed scientists to construct climate chronologies spanning over 10,000 years."], answer: 0, explanation: "Вариант А напрямую объясняет: благодаря годовым кольцам ученые смогли откалибровать даты и исправить неточности радиоуглеродного метода." },
+        { text: "While researching a topic, a student has taken notes on the Antikythera mechanism:<br>- It used a complex differential gear train comprising over thirty bronze gears to predict astronomical positions and eclipses.", question: "The student wants to emphasize the astronomical predictive capabilities of the Antikythera mechanism. Which choice most effectively uses relevant information?", choices: ["Recovered from a shipwreck in 1901, the Antikythera mechanism was constructed around the late 2nd or early 1st century BCE.", "Using a complex system of over thirty bronze gears, the Antikythera mechanism could accurately predict celestial positions, eclipses, and lunar cycles.", "In addition to astronomical tracking, the mechanical device featured an indicator display for the four-year Panhellenic Olympic cycle.", "Regarded as the world's oldest analogue computer, the ancient Greek device was fabricated with a differential gear train."], answer: 1, explanation: "Вариант B прямо описывает предсказательные способности: механизм мог «точно предсказывать небесные позиции, затмения и лунные циклы»." },
+        { text: "While researching a topic, a student has taken notes on physicist Chien-Shiung Wu:<br>- She observed that beta particles were emitted preferentially in the direction opposite to the nuclear spin.<br>- This directional asymmetry proved that parity is violated in weak nuclear interactions, overturning a fundamental axiom of theoretical physics.", question: "The student wants to emphasize the scientific significance of Wu's experimental result. Which choice most effectively uses relevant information?", choices: ["By aligning cobalt-60 atoms at cryogenic temperatures in 1956, physicist Chien-Shiung Wu conducted an experimental test of weak nuclear interactions.", "Theoretical physicists long assumed that physical processes and their mirror images were symmetrical under the law of parity conservation.", "Wu's discovery that beta decay exhibited directional asymmetry proved that parity conservation is violated in weak interactions, overturning a fundamental physical principle.", "In the 1956 Wu experiment, a magnetic field was utilized to orient the nuclear spins of cobalt-60 atoms."], answer: 2, explanation: "Вариант C напрямую говорит о значимости результата: это открытие доказало нарушение закона сохранения четности, тем самым «опровергнув фундаментальный физический принцип»." }
+    ];
+
+    // --- ДАННЫЕ ДЛЯ ТЕСТА 3 (August 2026) ---
+    const test3Data = [
+        { text: "The naturalist Rachel Okafor spent a decade studying the migratory patterns of Arctic terns, birds that travel farther each year than any other animal on Earth. Okafor's tracking data revealed that individual terns do not always follow the same route twice, suggesting that their navigation relies on more than fixed instinct alone.", question: "Which choice best states the main idea of the text?", choices: ["Arctic terns migrate farther than any other animal.", "Okafor's research suggests tern navigation may be more flexible than previously assumed.", "Okafor spent ten years studying birds.", "Terns never repeat a migratory route."], answer: 1, explanation: "Результаты показывают, что птицы не придерживаются одного маршрута, что означает, что их навигация более гибкая (flexible)." },
+        { text: "In the early twentieth century, the physicist Marie Curie's work on radioactivity was so ______ that it fundamentally reshaped the field of chemistry as well as physics.", question: "Which choice completes the text with the most logical word?", choices: ["trivial", "transformative", "redundant", "tentative"], answer: 1, explanation: "Работа Кюри «фундаментально изменила» обе науки, поэтому она была трансформирующей — «transformative»." },
+        { text: "A city planner is studying whether adding bike lanes reduces car traffic. She collects data from ten cities that installed new bike lanes between 2015 and 2020.<br><br><table class='data-table'><tr><th>City</th><th>% Change in Car Traffic</th><th>Miles of New Bike Lanes</th></tr><tr><td>A</td><td>-12%</td><td>8</td></tr><tr><td>B</td><td>-3%</td><td>2</td></tr><tr><td>C</td><td>-15%</td><td>10</td></tr><tr><td>D</td><td>-1%</td><td>1</td></tr></table>", question: "Which choice best describes the relationship shown in the table?", choices: ["Cities with more new bike lanes tended to see larger decreases in car traffic.", "Bike lanes had no effect on car traffic in any city.", "Car traffic increased in every city studied.", "The number of bike lanes was unrelated to traffic changes."], answer: 0, explanation: "Таблица показывает: чем больше миль велодорожек (Город С - 10 миль), тем больше снижается трафик (-15%)." },
+        { text: "The following text is from a short story.<br><br>Elena stared at the letter for a long moment before folding it back into its envelope. She did not cry, though her hands trembled slightly as she set it on the table and walked, quite deliberately, into the next room.", question: "The main purpose of this text is to:", choices: ["explain why Elena received a letter.", "convey Elena's suppressed emotional reaction through her actions.", "describe the contents of the letter in detail.", "argue that Elena is not upset."], answer: 1, explanation: "Текст описывает дрожащие руки и нарочито спокойную ходьбу, передавая её глубоко подавленную эмоциональную реакцию (suppressed emotional reaction)." },
+        { text: "Researchers studying coral reefs have found that reefs closer to river mouths, ______ receive more sediment runoff, generally show slower growth rates than reefs farther offshore.", question: "Which choice completes the text so that it conforms to the conventions of Standard English?", choices: ["which", "whom", "who", "whose"], answer: 0, explanation: "Придаточное предложение описывает коралловые рифы (неодушевленный предмет). Используется относительное местоимение «which»." },
+        { text: "Despite the museum's limited budget, its curators managed to mount an exhibit that was both intellectually rigorous and visually ______; visitors praised its striking use of color alongside its scholarly depth.", question: "Which choice completes the text?", choices: ["stunning", "monotonous", "forgettable", "haphazard"], answer: 0, explanation: "Выставка была визуально потрясающей, ошеломляющей — «stunning», так как хвалили её цвета." },
+        { text: "A student is writing a research paper and has found the following notes:<br>- Honeybee colonies communicate location of food via a \"waggle dance.\"<br>- The angle of the dance relative to the sun indicates direction.<br>- The duration of the dance indicates distance.", question: "The student wants to combine these notes into one sentence that explains how the waggle dance conveys information. Which choice most effectively does this?", choices: ["Honeybee colonies use a waggle dance, and the sun is important to bees.", "Bees communicate through dancing, which is interesting to scientists.", "In the honeybee's waggle dance, the angle relative to the sun signals direction, while the dance's duration signals distance.", "The waggle dance is a behavior performed by honeybees near their hive."], answer: 2, explanation: "Только вариант C объединяет оба механизма передачи информации: угол (направление) и продолжительность (дистанция)." },
+        { text: "The committee reviewed three proposals: the first focused on renewable energy, the second on public transit ______ the third on affordable housing.", question: "Which choice completes the text?", choices: ["and", "but", "or", "so"], answer: 0, explanation: "В перечислении трех элементов перед последним элементом ставится союз «и» (and)." },
+        { text: "Text 1: Economist Dr. Fen Zhao argues that automation, on balance, creates more jobs than it destroys by generating demand for new industries.<br><br>Text 2: Economist Dr. Amara Lewis argues that automation disproportionately displaces low-wage workers who lack access to retraining programs.", question: "Based on the texts, how would Lewis most likely respond to Zhao's argument?", choices: ["She would agree completely with no reservations.", "She would likely argue that new job creation does not offset harm to displaced low-wage workers.", "She would argue automation does not exist.", "She would say retraining programs are unnecessary."], answer: 1, explanation: "Льюис ответила бы, что тот факт, что создаются какие-то новые рабочие места, не компенсирует ущерб (harm), наносимый низкооплачиваемым рабочим." },
+        { text: "The volcano had been dormant for over three hundred years; consequently, few residents believed ______ posed any real threat.", question: "Which choice completes the text?", choices: ["it", "they", "them", "those"], answer: 0, explanation: "Местоимение должно заменять «volcano» (вулкан) в единственном числе. Правильный выбор — «it»." },
+        { text: "Historians have long debated the causes of the fall of the Roman Empire, with theories ranging from economic decline to military overreach; <u>however, an increasing number of scholars now point to environmental factors, such as prolonged droughts, as significant contributors.</u>", question: "Which choice best describes the function of the underlined portion in the text as a whole?", choices: ["It introduces a counterargument that the rest of the passage will refute.", "It presents an emerging perspective that adds to existing explanations.", "It dismisses all previous historical theories.", "It concludes the discussion of the Roman Empire's decline."], answer: 1, explanation: "Это появление новой, растущей перспективы (emerging perspective), которая дополняет картину падения Рима." },
+        { text: "A team of engineers designed a bridge using a new composite material. During testing, the material withstood loads 40% greater than standard steel of the same weight, though it cost nearly twice as much to produce.<br><br>The data suggest that the material may be ideal for applications where ______.", question: "Which choice most logically completes the text?", choices: ["cost is the primary concern", "weight savings and strength are prioritized over cost", "durability does not matter", "steel is unavailable for any reason"], answer: 1, explanation: "Материал будут использовать там, где характеристики веса и прочности настолько важны, что заказчик готов закрыть глаза на высокую стоимость." },
+        { text: "Neither the mayor nor the council members ______ prepared to address the sudden budget shortfall.", question: "Which choice completes the text?", choices: ["was", "were", "is", "has been"], answer: 1, explanation: "В конструкции «Neither A nor B» сказуемое согласуется с ближайшим подлежащим — «council members» (множественное число). Нужен глагол «were»." },
+        { text: "<i>(Отрывок с анекдотом о проваленной экспедиции)</i>", question: "The author includes the anecdote about the failed expedition primarily to:", choices: ["prove that all expeditions of this kind fail.", "illustrate the unpredictable dangers explorers faced.", "criticize the expedition's leader personally.", "provide comic relief in an otherwise serious text."], answer: 1, explanation: "Анекдоты в таких текстах используются, чтобы наглядно продемонстрировать (illustrate) реальные трудности или непредсказуемые опасности." },
+        { text: "Some sociologists argue that social media use correlates with increased feelings of isolation; others contend that the platforms merely reflect, rather than cause, preexisting loneliness. The debate remains ______.", question: "Which choice completes the text?", choices: ["resolved", "unanimous", "unsettled", "irrelevant"], answer: 2, explanation: "Одни говорят одно, другие — противоположное. Дискуссия остается неразрешенной, неурегулированной — «unsettled»." },
+        { text: "The chef, known for her inventive use of local ingredients, ______ opened a restaurant that sources everything within fifty miles.", question: "Which choice completes the text?", choices: ["recently, has", "recently has,", "recently has", "recently, has,"], answer: 2, explanation: "Пояснительная вставка выделяется запятыми с двух сторон. Дальнейшая глагольная фраза «recently has opened» должна идти слитно, без запятых внутри." },
+        { text: "Even though the experiment produced promising initial results, the researchers cautioned against ______ conclusions until the study could be replicated.", question: "Which choice most logically completes the text?", choices: ["drawing", "draw", "drew", "having drawn"], answer: 0, explanation: "После предлога (against) глагол должен употребляться в форме герундия (с окончанием -ing) — «drawing»." },
+        { text: "A student wants to add a sentence that provides a specific example supporting the claim that urban gardens improve community wellbeing.", question: "Which choice best accomplishes this goal?", choices: ["Urban gardens require regular watering and maintenance.", "In Detroit, a network of community gardens has been linked to reduced reported stress levels among participating residents.", "Gardens can be found in both cities and rural towns.", "Some people prefer flowers to vegetables."], answer: 1, explanation: "Вариант B называет конкретный город и приводит конкретный результат улучшения благополучия (снижение уровня стресса)." },
+        { text: "The report's findings were ______: while sales increased in urban markets, they declined sharply in rural ones, undercutting any simple narrative of overall growth.", question: "Which choice completes the text?", choices: ["uniform", "mixed", "conclusive", "irrelevant"], answer: 1, explanation: "Продажи в одном месте выросли, а в другом упали. Результаты были смешанными — «mixed»." },
+        { text: "Its migratory route spanning nearly 15,000 miles, the Arctic tern ______ one of the most remarkable travelers in the animal kingdom.", question: "Which choice completes the text?", choices: ["are", "is", "were", "have been"], answer: 1, explanation: "Подлежащее — «the Arctic tern» (ед. число). Нужен глагол в единственном числе — «is»." },
+        { text: "<i>(Отрывок об изобретателе и его ранних прототипах)</i>", question: "The passage suggests that the inventor's early failures were ultimately:", choices: ["irrelevant to her later success.", "instrumental in refining her final design.", "evidence that she should have quit.", "unrelated to the scientific process."], answer: 1, explanation: "Ранние неудачи послужили важным инструментом (instrumental) для доработки финального дизайна." },
+        { text: "The team had rehearsed the presentation for weeks. ______, a last-minute technical failure nearly derailed the entire pitch.", question: "Which choice provides the most effective transition?", choices: ["Similarly", "Nevertheless", "For example", "As a result"], answer: 1, explanation: "Они репетировали неделями, но технический сбой чуть всё не сорвал. Это прямое противопоставление — «Тем не менее» (Nevertheless)." },
+        { text: "The scientist's hypothesis, though initially met with skepticism, was later ______ by independent laboratories worldwide.", question: "Which choice completes the text?", choices: ["contradicted", "corroborated", "ignored", "forgotten"], answer: 1, explanation: "Сначала встретили со скептицизмом, но позже лаборатории её подтвердили (corroborated)." },
+        { text: "Each of the students in the advanced seminar ______ required to submit an independent research proposal.", question: "Which choice completes the text?", choices: ["are", "is", "were", "have been"], answer: 1, explanation: "Местоимение «Each» (каждый) требует сказуемого в единственном числе — «is»." },
+        { text: "A writer wants to conclude a paragraph about renewable energy adoption with a sentence that emphasizes future potential rather than past achievements.", question: "Which choice best accomplishes this goal?", choices: ["Solar capacity doubled between 2015 and 2020.", "Wind energy has grown steadily over the past decade.", "With costs continuing to fall, renewable sources may soon surpass fossil fuels as the world's primary energy supply.", "Fossil fuels have powered industry for over a century."], answer: 2, explanation: "Только вариант C делает акцент на будущем: «скоро могут превзойти» (may soon surpass)." },
+        { text: "The novel's protagonist, torn between loyalty to her family and her own ambitions, embodies the central ______ of the story.", question: "Which choice completes the text?", choices: ["setting", "tension", "footnote", "glossary"], answer: 1, explanation: "Главная героиня разрывается между семьей и амбициями, что представляет собой центральное напряжение (tension) романа." },
+        { text: "The senator's speech was widely criticized for being ______ ; it addressed the topic for over an hour without stating a clear position.", question: "Which choice completes the text with the most logical and precise word?", choices: ["concise", "evasive", "blunt", "decisive"], answer: 1, explanation: "Говорить час и не высказать четкой позиции — это значит быть уклончивым (evasive)." }
+    ];
+
+    // Объект со всеми тестами
+    const allTests = {
+        test1: test1Data,
+        test2: test2Data,
+        test3: test3Data
+    };
+
+    let currentTestId = 'test1';
+
+    // Функция переключения вкладок
+    function switchTab(testId) {
+        currentTestId = testId;
+        
+        // Обновляем стили кнопок
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('tab-' + testId).classList.add('active');
+        
+        // Перерисовываем вопросы из выбранного теста
+        renderQuestions();
+    }
+
+    // Перемешивание массива
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Обработчик кнопки Shuffle (перемешивает только текущий тест)
+    function shuffleQuestions() {
+        shuffleArray(allTests[currentTestId]);
+        renderQuestions();
+    }
+
+    // Отрисовка вопросов текущего теста
+    function renderQuestions() {
+        const container = document.getElementById('test-container');
+        let html = '';
+        const currentData = allTests[currentTestId];
+
+        currentData.forEach((q, index) => {
+            const letters = ['A', 'B', 'C', 'D'];
+            let choicesHtml = '';
+            
+            q.choices.forEach((choice, cIndex) => {
+                choicesHtml += `
+                    <label class="choice-label" id="label-${index}-${cIndex}">
+                        <input type="radio" name="q${index}" value="${cIndex}">
+                        <span class="choice-letter">${letters[cIndex]}.</span> 
+                        <span>${choice}</span>
+                    </label>
+                `;
+            });
+
+            // Для отображения номера вопроса используем индекс массива
+            const displayNum = index + 1;
+
+            html += `
+                <div class="question-card" id="qcard-${index}">
+                    <div class="question-header">Вопрос ${displayNum} (из ${currentData.length})</div>
+                    <div class="text-content">${q.text}</div>
+                    ${q.question ? `<div class="sub-question">${q.question}</div>` : ''}
+                    <div class="choices">
+                        ${choicesHtml}
+                    </div>
+                    <div class="error-msg" id="error-${index}">Пожалуйста, выберите один из вариантов ответа.</div>
+                    <button class="btn" id="btn-${index}" onclick="checkAnswer(${index})">Check Answer</button>
+                    <div class="explanation" id="exp-${index}">
+                        <strong>Ответ: ${letters[q.answer]}</strong><br><br>
+                        ${q.explanation}
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // Логика проверки ответа
+    function checkAnswer(qIndex) {
+        const currentData = allTests[currentTestId];
+        const radios = document.getElementsByName(`q${qIndex}`);
+        let selectedValue = -1;
+
+        for (let i = 0; i < radios.length; i++) {
+            if (radios[i].checked) {
+                selectedValue = parseInt(radios[i].value);
+                break;
+            }
+        }
+
+        const errorMsg = document.getElementById(`error-${qIndex}`);
+        
+        if (selectedValue === -1) {
+            errorMsg.style.display = 'block';
+            return;
+        } else {
+            errorMsg.style.display = 'none';
+        }
+
+        const correctValue = currentData[qIndex].answer;
+
+        for (let i = 0; i < radios.length; i++) {
+            const label = document.getElementById(`label-${qIndex}-${i}`);
+            label.classList.add('disabled'); 
+            radios[i].disabled = true;       
+
+            if (i === correctValue) {
+                label.classList.add('correct-choice');
+            } else if (i === selectedValue && selectedValue !== correctValue) {
+                label.classList.add('incorrect-choice');
+            }
+        }
+
+        document.getElementById(`exp-${qIndex}`).style.display = 'block';
+        const btn = document.getElementById(`btn-${qIndex}`);
+        btn.disabled = true;
+        btn.innerText = 'Checked';
+    }
+
+    // Первичная отрисовка
+    renderQuestions();
+</script>
+</body>
+</html>
